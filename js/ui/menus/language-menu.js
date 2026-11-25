@@ -100,5 +100,3 @@ export class LanguageMenu extends DropdownMenu {
     });
   }
 }
-
-export const languageMenu = new LanguageMenu();

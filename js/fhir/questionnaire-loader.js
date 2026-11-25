@@ -48,10 +48,7 @@ export class QuestionnaireLoader {
     }
   }
 
-  /**
-   * Hard reset: destroy tree, clear all state, dispatch QUESTIONNAIRE_CLEARED.
-   * Equivalent to the old _doReset() — but encapsulated in the loader.
-   */
+  /** Hard reset: destroy tree, clear all state, dispatch QUESTIONNAIRE_CLEARED. */
   reset() {
     this._importSeq++; // a ValueSet expansion still in flight belongs to the form that was cleared
     this._questDoc.reset();

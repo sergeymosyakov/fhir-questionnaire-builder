@@ -756,7 +756,7 @@ export class BaseNode {
     }, { signal: this._navAbort.signal });
   }
 
-  /** Triggers renderTree() in builder/index.js */
+  /** Asks the builder to re-render the tree */
   _dispatchRerender() {
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
   }

@@ -1,6 +1,7 @@
 // ── FHIR import: pure helper functions ───────────────────────────────────────
 // No side-effects, no state imports. Used by import-item.js and import.js.
-import { ITLH_KEY_GROUP_OR } from '../utils.js';import {
+import { ITLH_KEY_GROUP_OR } from '../utils.js';
+import {
   ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
 } from './format-registry.js';

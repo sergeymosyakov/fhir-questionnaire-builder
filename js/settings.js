@@ -155,6 +155,26 @@ function _renderProviders() {
   });
 }
 
+// Every text setting on the page: config key → input id.
+const FIELDS = [
+  [CONFIG_KEYS.TERMINOLOGY_SERVER, 'termServerInput'],
+  [CONFIG_KEYS.FHIR_BASE, 'fhirBaseInput'],
+  [CONFIG_KEYS.CORS_PROXY, 'corsProxyInput'],
+  [CONFIG_KEYS.NLM_API_BASE, 'nlmApiInput'],
+  [CONFIG_KEYS.SDC_SERVER, 'sdcServerInput'],
+  [CONFIG_KEYS.TRANSLATE_API, 'translateApiInput'],
+  [CONFIG_KEYS.TRANSLATE_API_KEY, 'translateApiKeyInput'],
+  [CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL, 'fhirBaseOauthAuthorizeInput'],
+  [CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL, 'fhirBaseOauthTokenInput'],
+  [CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID, 'fhirBaseOauthClientIdInput'],
+  [CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE, 'fhirBaseOauthScopeInput'],
+  [CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL, 'sdcServerOauthAuthorizeInput'],
+  [CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL, 'sdcServerOauthTokenInput'],
+  [CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID, 'sdcServerOauthClientIdInput'],
+  [CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE, 'sdcServerOauthScopeInput'],
+];
+const FIELD_INPUT = Object.fromEntries(FIELDS);
+
 // ── Wire input field ──────────────────────────────────────────────────────────
 function _wireField(inputId, resetId, key) {
   const input = _el(inputId);
@@ -254,24 +274,7 @@ function _updateCloudBadge(user) {
 
 // Refresh all input fields from current serverConfig values (after cloud load)
 function _refreshAllFields() {
-  const map = {
-    [CONFIG_KEYS.TERMINOLOGY_SERVER]: 'termServerInput',
-    [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
-    [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
-    [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
-    [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
-    [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
-    [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
-    [CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL]:  'fhirBaseOauthAuthorizeInput',
-    [CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL]:      'fhirBaseOauthTokenInput',
-    [CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID]:      'fhirBaseOauthClientIdInput',
-    [CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE]:          'fhirBaseOauthScopeInput',
-    [CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL]: 'sdcServerOauthAuthorizeInput',
-    [CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL]:     'sdcServerOauthTokenInput',
-    [CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID]:     'sdcServerOauthClientIdInput',
-    [CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE]:         'sdcServerOauthScopeInput',
-  };
-  for (const [key, inputId] of Object.entries(map)) {
+  for (const [key, inputId] of FIELDS) {
     const inp = _el(inputId);
     // Never overwrite a field the user is actively editing.
     if (inp && document.activeElement !== inp) inp.value = serverConfig.get(key) || '';
@@ -282,35 +285,13 @@ function _refreshAllFields() {
 }
 
 _el('saveBtn').addEventListener('click', () => {
-  _collectField('termServerInput', CONFIG_KEYS.TERMINOLOGY_SERVER);
-  _collectField('fhirBaseInput',   CONFIG_KEYS.FHIR_BASE);
-  _collectField('corsProxyInput',  CONFIG_KEYS.CORS_PROXY);
-  _collectField('nlmApiInput',     CONFIG_KEYS.NLM_API_BASE);
-  _collectField('sdcServerInput',  CONFIG_KEYS.SDC_SERVER);
-  _collectField('translateApiInput', CONFIG_KEYS.TRANSLATE_API);
-  _collectField('translateApiKeyInput', CONFIG_KEYS.TRANSLATE_API_KEY);
-  _collectField('fhirBaseOauthAuthorizeInput', CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL);
-  _collectField('fhirBaseOauthTokenInput',     CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL);
-  _collectField('fhirBaseOauthClientIdInput',  CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID);
-  _collectField('fhirBaseOauthScopeInput',     CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE);
-  _collectField('sdcServerOauthAuthorizeInput', CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL);
-  _collectField('sdcServerOauthTokenInput',     CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL);
-  _collectField('sdcServerOauthClientIdInput',  CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID);
-  _collectField('sdcServerOauthScopeInput',     CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE);
+  FIELDS.forEach(([key, inputId]) => _collectField(inputId, key));
   _collectProvider();
   // Re-sync all reset button states and input custom styles
   document.querySelectorAll('[data-reset]').forEach(btn => {
     const key = btn.dataset.reset;
     btn.disabled = _lsProvider.get(key) == null;
-    const map = {
-      [CONFIG_KEYS.TERMINOLOGY_SERVER]: 'termServerInput',
-      [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
-      [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
-      [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
-      [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
-      [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
-      [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
-    };
+    const map = FIELD_INPUT;
     const inp = _el(map[key]);
     if (inp) inp.classList.toggle('is-custom', _lsProvider.get(key) != null);
   });
@@ -327,21 +308,7 @@ _el('saveBtn').addEventListener('click', () => {
 async function init() {
   await serverConfig.ready();
 
-  _wireField('termServerInput', null, CONFIG_KEYS.TERMINOLOGY_SERVER);
-  _wireField('fhirBaseInput',   null, CONFIG_KEYS.FHIR_BASE);
-  _wireField('corsProxyInput',  null, CONFIG_KEYS.CORS_PROXY);
-  _wireField('nlmApiInput',     null, CONFIG_KEYS.NLM_API_BASE);
-  _wireField('sdcServerInput',  null, CONFIG_KEYS.SDC_SERVER);
-  _wireField('translateApiInput', null, CONFIG_KEYS.TRANSLATE_API);
-  _wireField('translateApiKeyInput', null, CONFIG_KEYS.TRANSLATE_API_KEY);
-  _wireField('fhirBaseOauthAuthorizeInput', null, CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL);
-  _wireField('fhirBaseOauthTokenInput',     null, CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL);
-  _wireField('fhirBaseOauthClientIdInput',  null, CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID);
-  _wireField('fhirBaseOauthScopeInput',     null, CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE);
-  _wireField('sdcServerOauthAuthorizeInput', null, CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL);
-  _wireField('sdcServerOauthTokenInput',     null, CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL);
-  _wireField('sdcServerOauthClientIdInput',  null, CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID);
-  _wireField('sdcServerOauthScopeInput',     null, CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE);
+  FIELDS.forEach(([key, inputId]) => _wireField(inputId, null, key));
   _renderTranslateProvider();
 
   // Wire reset buttons by data-reset attribute
@@ -351,15 +318,7 @@ async function init() {
     btn.addEventListener('click', () => {
       _lsProvider.set(key, null);
       // Refresh corresponding input
-      const map = {
-        [CONFIG_KEYS.TERMINOLOGY_SERVER]: 'termServerInput',
-        [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
-        [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
-        [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
-        [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
-        [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
-        [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
-      };
+      const map = FIELD_INPUT;
       const inp = _el(map[key]);
       if (inp) {
         inp.value = serverConfig.get(key) || '';

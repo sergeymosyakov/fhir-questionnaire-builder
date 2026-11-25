@@ -10,9 +10,6 @@ import { BaseNode, isRelevantItem } from './base-node.js';
 import { isDescendant } from '../utils.js';
 
 export class GroupNode extends BaseNode {
-  /** Backward-compat: delegates to BaseNode._collapseMap (shared with ItemNode). */
-  static get _collapseMap() { return BaseNode._collapseMap; }
-
   constructor(data = {}) {
     super(data);
     this.type            = 'group';

@@ -132,8 +132,7 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
         const { off, on } = enabledState(tree, { values, results, fp, qr, envVars });
         const next = Object.fromEntries(Object.entries(scenarios[s]).filter(([id]) => !off.has(id)));
         const stable = Object.keys(next).sort().join('\n') === Object.keys(answers).sort().join('\n');
-        if (stable || round === 2) { on.forEach((id) => enabledEver.add(id)); }
-        if (stable || round === 2) break; // the answers kept always match the results recorded with them
+        if (stable || round === 2) { on.forEach((id) => enabledEver.add(id)); break; } // the answers kept always match the results recorded with them
         answers = next;
       }
     } catch (_e) { continue; } // one scenario the engine cannot build must not end the whole check
