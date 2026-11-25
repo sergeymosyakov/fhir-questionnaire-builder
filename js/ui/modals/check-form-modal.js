@@ -14,7 +14,7 @@ const LABEL = {
   skipped: 'Not checked',
   ok: 'All results reachable',
 };
-const PROBLEMS = new Set(['unreachable', 'no-result']);
+const PROBLEMS = new Set(['unreachable', 'no-result', 'never-shown']);
 
 class CheckFormModal extends Modal {
   constructor() {
@@ -66,14 +66,15 @@ class CheckFormModal extends Modal {
     return p;
   }
 
-  _render({ scenarios, truncated, calcs }) {
+  _render({ scenarios, truncated, calcs, unshown = [] }) {
     this._truncated = truncated;
     this.body.innerHTML = '';
-    if (!calcs.length) { this._note('This form has no calculated values to check.', 'check-form-summary'); return; }
-    const bad = calcs.filter((c) => PROBLEMS.has(c.status)).length;
-    this._note(`${bad ? `${bad} of ${calcs.length} calculations need attention` : `All ${calcs.length} calculations behave as expected`} (${scenarios} answer combinations tried${truncated ? '; a very large form, so not all were' : ''}).`, 'check-form-summary');
+    if (!calcs.length && !unshown.length) { this._note('This form has no calculated values to check and no Show When rule that could never be met.', 'check-form-summary'); return; }
+    const items = [...calcs, ...unshown.map((u) => ({ ...u, status: 'never-shown' }))];
+    const bad = items.filter((c) => PROBLEMS.has(c.status)).length;
+    this._note(`${bad ? `${bad} of ${items.length} checks need attention` : `All ${calcs.length} calculations behave as expected`} (${scenarios} answer combinations tried${truncated ? '; a very large form, so not all were' : ''}).`, 'check-form-summary');
     const list = document.createElement('div');
-    for (const c of [...calcs].sort((a, b) => Number(PROBLEMS.has(b.status)) - Number(PROBLEMS.has(a.status)))) list.appendChild(this._row(c));
+    for (const c of [...items].sort((a, b) => Number(PROBLEMS.has(b.status)) - Number(PROBLEMS.has(a.status)))) list.appendChild(this._row(c));
     this.body.appendChild(list);
     this.body.appendChild(this._reportLink());
   }
@@ -117,7 +118,7 @@ class CheckFormModal extends Modal {
     nav.className = 'validate-nav-btn';
     nav.dataset.testid = 'check-form-nav-btn';
     nav.dataset.tipTitle = 'Go to node in builder';
-    nav.dataset.tipBody = 'Closes this window and shows the calculation in the builder.';
+    nav.dataset.tipBody = 'Closes this window and shows it in the builder.';
     nav.setAttribute('aria-label', `Go to ${c.title} in the builder`);
     nav.textContent = '↗';
     nav.addEventListener('click', () => {
@@ -135,6 +136,7 @@ class CheckFormModal extends Modal {
       const seen = c.reached.length ? ` Results that do appear: ${c.reached.slice(0, 8).map((r) => `“${r}”`).join(', ')}${c.reached.length > 8 ? ', …' : ''}.` : '';
       return `${lines.join('; ')}${maybe}.${seen} Check that condition and the ones before it: an earlier condition may already cover every case, or the threshold may be out of range.`;
     }
+    if (c.status === 'never-shown') return `Never shown: its Show When rule (${c.when}) is not met by any of the answers tried, so nobody can answer it. Check the rule.`;
     if (c.status === 'no-result') return 'No combination of answers gives it a value. Check its formula and the questions it reads.';
     if (c.status === 'skipped') return `${LABEL.skipped}: ${c.reason}.`;
     return `${LABEL.ok}.`;

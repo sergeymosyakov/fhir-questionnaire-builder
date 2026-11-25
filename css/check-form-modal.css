@@ -1,7 +1,7 @@
 /* ── Check my form modal ── */
 .check-form-note { margin: 0 0 12px; font-size: 0.9rem; line-height: 1.45; }
 .check-form-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; margin-bottom: 6px; border-left: 4px solid var(--c-border, #ccc); background: var(--c-surface, transparent); }
-.check-form-row--unreachable, .check-form-row--no-result { border-left-color: #c0392b; }
+.check-form-row--unreachable, .check-form-row--no-result, .check-form-row--never-shown { border-left-color: #c0392b; }
 .check-form-row--ok { border-left-color: #2e8b57; }
 .check-form-text { flex: 1; min-width: 0; }
 .check-form-detail { font-size: 0.85rem; color: var(--c-text-secondary, #666); overflow-wrap: anywhere; }

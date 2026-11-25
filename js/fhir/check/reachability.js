@@ -1,8 +1,10 @@
 // "Check my form": runs every calculation over generated answer sets and reports text results no answers can produce.
 import { buildCalcCache, buildVarEnv, evalCalcNodes } from '../calc.js';
+import { buildDepGraph, topoOrder } from '../dep-graph.js';
 import { buildQR } from '../qr-builder.js';
 import { rawOptsToPairs } from '../../utils.js';
 import { collectInputs, buildScenarios } from './generators.js';
+import { hasCondition, enabledState, describeWhen } from './enabled.js';
 
 const LITERAL = /'((?:[^'\\]|\\.)*)'/g;
 const yieldToUi = () => new Promise((r) => setTimeout(r, 0));
@@ -80,7 +82,7 @@ const describeInput = (d) => `${d.title || d.id} (${KIND[d.itemType] ?? 'a quest
 
 /**
  * @param {{ tree: object[], base: object, fp: object, variables?: object[] }} form
- * @returns {Promise<{ scenarios: number, truncated: boolean, trials: [{ answers, results }], calcs: object[] }>} calcs: { id, title, status: 'ok'|'unreachable'|'no-result'|'skipped', missed?, details? [{ text, when }], reached?, reason? }
+ * @returns {Promise<{ scenarios: number, truncated: boolean, unshown: [{ id, title, when }], trials: [{ answers, results }], calcs: object[] }>} calcs: { id, title, status: 'ok'|'unreachable'|'no-result'|'skipped', missed?, details? [{ text, when }], reached?, reason? }
  */
 export async function checkForm({ tree, base, fp, variables = [], onProgress }) {
   if (!fp) throw new Error('the FHIRPath engine is not loaded');
@@ -89,23 +91,48 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
   const answerTexts = new Set();
   walk(tree, (n) => rawOptsToPairs(n._rawAnswerOptions).forEach((o) => { answerTexts.add(o.code); answerTexts.add(o.display); }));
   const inputs = collectInputs(tree);
+  walk(tree, (n) => (n.enableWhen || []).forEach((ew) => { // a number a Show When rule compares with is a value worth trying
+    const v = ew.answerInteger ?? ew.answerDecimal;
+    const input = inputs.find((i) => i.id === ew.question);
+    if (input?.kind !== 'number' || !Number.isFinite(v)) return;
+    for (const x of ew.operator === '>' ? [v + 1] : ew.operator === '<' ? [v - 1] : [v]) { // a strict comparison needs the neighbour, not the value
+      if (x >= input.lo && x <= input.hi && !input.values.includes(x)) input.values.push(x);
+    }
+  }));
   const inputIds = new Set(inputs.map((i) => i.id));
   const calcs = [...byId.values()].filter((n) => n._calculatedExpr);
   const scenarios = buildScenarios(inputs);
   const cache = buildCalcCache(tree, variables);
+  const passes = topoOrder(buildDepGraph(tree, variables)).cycles.length || variables.length ? 2 : 1; // calculations run in dependency order; a cycle or a variable (not in the graph) needs a second look
 
   const reached = new Map(calcs.map((c) => [c.id, new Set()]));
   const trials = []; // every combination tried, with what each calculation gave
+  const conditional = [...byId.values()].some(hasCondition);
+  const enabledEver = new Set(); // questions Show When enabled for at least one answer set
   onProgress?.(0, scenarios.length);
   let sliceStart = Date.now();
   for (let s = 0; s < scenarios.length; s++) {
     if (Date.now() - sliceStart > SLICE_MS) { onProgress?.(s, scenarios.length); await yieldToUi(); sliceStart = Date.now(); } // before the work, so a run of failing scenarios still yields
-    const values = Object.fromEntries(Object.entries(scenarios[s]).map(([id, v]) => [id, [v]])); // the answer store keeps a list per question
-    const results = {};
+    let answers = scenarios[s]; // the answers still enabled by Show When; the rest are dropped, as a person could not give them
+    let results = {};
+    let envVars;
     try {
-      const qr = buildQR(base, values);
-      for (let pass = 0; pass < 2; pass++) { // a calculation may read another one that comes later in the form; results are written back into the response
-        evalCalcNodes(tree, qr, fp, results, buildVarEnv(variables, qr, fp), base, cache);
+      for (let round = 0; round < 3; round++) {
+        const values = Object.fromEntries(Object.entries(answers).map(([id, v]) => [id, [v]])); // the answer store keeps a list per question
+        const qr = buildQR(base, values);
+        results = {};
+        envVars = buildVarEnv(variables, qr, fp);
+        for (let pass = 0; pass < passes; pass++) { // results are written back into the response, so a later calculation reads an earlier one
+          if (pass && variables.length) envVars = buildVarEnv(variables, qr, fp);
+          evalCalcNodes(tree, qr, fp, results, envVars, base, cache);
+        }
+        if (!conditional) break;
+        const { off, on } = enabledState(tree, { values, results, fp, qr, envVars });
+        const next = Object.fromEntries(Object.entries(scenarios[s]).filter(([id]) => !off.has(id)));
+        const stable = Object.keys(next).sort().join('\n') === Object.keys(answers).sort().join('\n');
+        if (stable || round === 2) { on.forEach((id) => enabledEver.add(id)); }
+        if (stable || round === 2) break; // the answers kept always match the results recorded with them
+        answers = next;
       }
     } catch (_e) { continue; } // one scenario the engine cannot build must not end the whole check
     const gave = {};
@@ -114,7 +141,7 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
       gave[c.id] = v === undefined || v === null || v === '' ? null : String(v);
       if (gave[c.id] !== null) reached.get(c.id).add(gave[c.id]);
     }
-    trials.push({ answers: scenarios[s], results: gave });
+    trials.push({ answers, results: gave });
   }
 
   onProgress?.(scenarios.length, scenarios.length);
@@ -130,5 +157,11 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
     const lost = bandsOf(c, byId, answerTexts).filter((b) => !got.includes(b.text));
     return { id: c.id, title, reads: readIds, via, status: lost.length ? 'unreachable' : 'ok', missed: lost.map((b) => b.text), details: lost, reached: got };
   });
-  return { scenarios: scenarios.length, truncated: scenarios.truncated, calcs: report, trials };
+  // A question with a Show When rule that no answer set enabled — only judged when every question the rule reads can be tried.
+  const settable = (id) => inputIds.has(id) || byId.get(id)?._calculatedExpr;
+  const inRepeat = new Set();
+  walk(tree, (n) => { if (n.type === 'group' && n.repeats) walk(n.children, (c) => inRepeat.add(c.id)); }); // the preview does not evaluate Show When inside a repeating group
+  const unshown = !conditional ? [] : [...byId.values()].filter((n) => n.type === 'item' && n.enableWhen?.length && !n.enableWhenExpression
+    && !inRepeat.has(n.id) && !enabledEver.has(n.id) && n.enableWhen.every((ew) => settable(ew.question))).map((n) => ({ id: n.id, title: n.title || n.id, when: describeWhen(n, (id) => byId.get(id)?.title || id) }));
+  return { scenarios: scenarios.length, truncated: scenarios.truncated, calcs: report, trials, unshown };
 }
