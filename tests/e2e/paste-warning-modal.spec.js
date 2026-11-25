@@ -21,6 +21,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';
+import { openMenu } from './helpers/dropdown.js';
 
 const SDC = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/';
 const calc = expression => ({
@@ -49,12 +50,7 @@ async function load(page, items) {
 // Run a gear-menu action on a node, reopening the menu retry-safely.
 async function gearAction(page, nodeId, actionTestid) {
   const node = page.locator(`[data-node-id="${nodeId}"]`).first();
-  await expect(async () => {
-    if (!(await node.getByTestId(actionTestid).first().isVisible())) {
-      await node.getByTestId('node-gear-btn').first().click();
-    }
-    await expect(node.getByTestId(actionTestid).first()).toBeVisible();
-  }).toPass();
+  await openMenu(node.getByTestId('node-gear-btn').first(), node.getByTestId(actionTestid).first());
   await node.getByTestId(actionTestid).first().click();
 }
 

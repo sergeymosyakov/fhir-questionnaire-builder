@@ -16,7 +16,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, openMenu } from './helpers/dropdown.js';
 
 async function seedTree(page) {
   await freshStart(page);
@@ -52,12 +52,7 @@ test.describe('Simple / Advanced view mode', () => {
     await seedTree(page);
     await openDropdownItem(page, 'more-btn', 'view-simple-item');
     // Reopen the menu and verify Simple is checked, Advanced is not.
-    await expect(async () => {
-      if (!(await page.getByTestId('view-simple-item').isVisible())) {
-        await page.getByTestId('more-btn').click();
-      }
-      await expect(page.getByTestId('view-simple-item')).toBeVisible();
-    }).toPass();
+    await openMenu(page.getByTestId('more-btn'), page.getByTestId('view-simple-item'));
     await expect(page.getByTestId('view-simple-item')).toHaveClass(/load-menu-item--checked/);
     await expect(page.getByTestId('view-advanced-item')).not.toHaveClass(/load-menu-item--checked/);
   });

@@ -21,6 +21,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';
+import { commitInput } from './helpers/preview.js';
 
 const FIXTURE = path.resolve('tests/fixtures/preview-validation-length-regex.fhir.json');
 
@@ -28,12 +29,6 @@ async function loadFixture(page) {
   await freshStart(page);
   await page.getByTestId('fhir-file-input').setInputFiles(FIXTURE);
   await expect(page.locator('[data-preview-id="opt-min"]')).toBeVisible({ timeout: 8_000 });
-}
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 async function enter(page, id, value) {

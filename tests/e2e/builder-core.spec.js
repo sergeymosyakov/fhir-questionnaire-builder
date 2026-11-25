@@ -41,7 +41,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup, waitForLoad } from './helpers/builder.js';
-import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect, openMenu } from './helpers/dropdown.js';
 
 // ── App boot ──────────────────────────────────────────────────────────────────
 
@@ -167,12 +167,7 @@ test.describe('Builder → preview: delete item', () => {
     await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
 
     const itemNode = page.locator(`[data-node-id="${itemId}"]`);
-    await expect(async () => {
-      if (!(await itemNode.getByTestId('node-delete-btn').isVisible())) {
-        await itemNode.getByTestId('node-gear-btn').click();
-      }
-      await expect(itemNode.getByTestId('node-delete-btn')).toBeVisible();
-    }).toPass();
+    await openMenu(itemNode.getByTestId('node-gear-btn'), itemNode.getByTestId('node-delete-btn'));
     await itemNode.getByTestId('node-delete-btn').click();
     await page.getByTestId('delete-confirm-del-btn').click();
 
@@ -191,12 +186,7 @@ test.describe('Builder → preview: delete group with children', () => {
     await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
 
     const groupNode = page.locator(`[data-node-id="${groupId}"]`);
-    await expect(async () => {
-      if (!(await groupNode.getByTestId('node-delete-btn').first().isVisible())) {
-        await groupNode.getByTestId('group-add-btn').first().click();
-      }
-      await expect(groupNode.getByTestId('node-delete-btn').first()).toBeVisible();
-    }).toPass();
+    await openMenu(groupNode.getByTestId('group-add-btn').first(), groupNode.getByTestId('node-delete-btn').first());
     await groupNode.getByTestId('node-delete-btn').first().click();
     await page.getByTestId('delete-confirm-del-btn').click();
 

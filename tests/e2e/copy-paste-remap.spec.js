@@ -11,22 +11,13 @@ import { test, expect } from '@playwright/test';
 import path from 'path';
 import { freshStart, FIXTURES } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { commitInput } from './helpers/preview.js';
+import { openMenu } from './helpers/dropdown.js';
 
 async function gearAction(page, gearTestid, actionTestid) {
   const node = page.locator('[data-node-id="g"]').first();
-  await expect(async () => {
-    if (!(await node.getByTestId(actionTestid).first().isVisible())) {
-      await node.getByTestId(gearTestid).first().click();
-    }
-    await expect(node.getByTestId(actionTestid).first()).toBeVisible();
-  }).toPass();
+  await openMenu(node.getByTestId(gearTestid).first(), node.getByTestId(actionTestid).first());
   await node.getByTestId(actionTestid).first().click();
-}
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 test('pasted group calculates from its own copied input, not the original', async ({ page }) => {

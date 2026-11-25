@@ -11,13 +11,16 @@
 
 import { expect } from '@playwright/test';
 
-export async function openDropdownItem(page, toggleTestId, itemTestId) {
+// Locator form (a gear menu scoped to one node, …): open retry-safely until `item` is visible; the caller clicks it.
+export async function openMenu(toggle, item) {
   await expect(async () => {
-    if (!(await page.getByTestId(itemTestId).isVisible())) {
-      await page.getByTestId(toggleTestId).click();
-    }
-    await expect(page.getByTestId(itemTestId)).toBeVisible();
+    if (!(await item.isVisible())) await toggle.click();
+    await expect(item).toBeVisible();
   }).toPass();
+}
+
+export async function openDropdownItem(page, toggleTestId, itemTestId) {
+  await openMenu(page.getByTestId(toggleTestId), page.getByTestId(itemTestId));
   await page.getByTestId(itemTestId).click();
 }
 

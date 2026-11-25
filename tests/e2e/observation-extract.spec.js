@@ -39,7 +39,7 @@ import path from 'node:path';
 import fs   from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect, openMenu } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
 
@@ -80,10 +80,7 @@ test.describe('observation-extract — dropdown in States modal', () => {
 test.describe('observation-extract — toggle and apply', () => {
   test('selecting "Yes" and applying activates the States action link', async ({ page }) => {
     await freshStart(page);
-    await expect(async () => {
-      if (!(await page.getByTestId('add-menu-btn').isVisible())) return;
-      await clickAddRootGroup(page);
-    }).toPass();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 6_000 });
     const nodeId = await page.locator('[data-node-id]').first().getAttribute('data-node-id');
     await openStatesModal(page, nodeId);
@@ -122,12 +119,7 @@ test.describe('observation-extract — toggle and apply', () => {
 test.describe('observation-extract — export menu', () => {
   test('"Observations" item appears in Save dropdown', async ({ page }) => {
     await loadFixture(page);
-    await expect(async () => {
-      if (!(await page.getByTestId('export-obs-item').isVisible())) {
-        await page.getByTestId('export-btn').click();
-      }
-      await expect(page.getByTestId('export-obs-item')).toBeVisible();
-    }).toPass();
+    await openMenu(page.getByTestId('export-btn'), page.getByTestId('export-obs-item'));
     await expect(page.getByTestId('export-obs-item')).toBeVisible();
     // Close menu
     await page.keyboard.press('Escape');

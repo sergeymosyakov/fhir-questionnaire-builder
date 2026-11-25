@@ -17,6 +17,7 @@ const TOKEN_URL      = 'https://mock-idp.example.com/oauth2/token';
 
 async function dispatchLoginRequired(page, serverKey = 'FHIR_BASE') {
   await page.evaluate((key) => {
+    // raw name = AppEvents.OAUTH_LOGIN_REQUIRED: the page context cannot import the constant
     document.dispatchEvent(new CustomEvent('oauth:login-required', { detail: { serverKey: key } }));
   }, serverKey);
 }

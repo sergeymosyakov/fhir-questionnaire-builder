@@ -15,7 +15,7 @@ Selectors must use `data-testid` (via `element.dataset.testid`) **wherever possi
 
 ## Flaky-test patterns
 
-**Preview input commit** — to commit a value entered in a preview-panel input (triggering `blur` → `BaseNode.notifyChanged()` → `RESPONSE_CHANGED`), always click the search input: `await page.getByTestId('preview-search-input').click()`. This is a real `<input>` so focus transfer is guaranteed. Never use `Tab`, `waitForTimeout`, or clicking a non-input span. Encapsulate:
+**Preview input commit** — to commit a value entered in a preview-panel input (triggering `blur` → `BaseNode.notifyChanged()` → `RESPONSE_CHANGED`), always click the search input: `await page.getByTestId('preview-search-input').click()`. This is a real `<input>` so focus transfer is guaranteed. Never use `Tab`, `waitForTimeout`, or clicking a non-input span. Use `commitInput(page)` from `helpers/preview.js` — never a per-spec copy. Its body:
 ```js
 async function commitInput(page) {
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
@@ -35,7 +35,7 @@ await item.getByTestId('node-title-input').fill(title);
 await item.getByTestId('node-title-input').blur();
 ```
 
-**Dropdown-menu open** — `DropdownMenu` toggle buttons (`export-btn`, `tools-btn`, `load-btn`, `save-btn`, etc.) flip the menu: clicking while open *closes* it. Never click the toggle then immediately click a menu item — if the first click is missed (or a `CLOSE_DROPDOWNS` race fires), the item stays `display:none` and the test hangs. Open retry-safely by clicking the toggle only when the target item is not yet visible:
+**Dropdown-menu open** — `DropdownMenu` toggle buttons (`export-btn`, `tools-btn`, `load-btn`, `save-btn`, etc.) flip the menu: clicking while open *closes* it. Never click the toggle then immediately click a menu item — if the first click is missed (or a `CLOSE_DROPDOWNS` race fires), the item stays `display:none` and the test hangs. Open retry-safely with `openMenu(toggleLocator, itemLocator)` / `openDropdownItem(page, toggleTestId, itemTestId)` from `helpers/dropdown.js` (they click the toggle only when the item is not yet visible). The pattern they implement:
 ```js
 await expect(async () => {
   if (!(await page.getByTestId('export-quest-item').isVisible())) {

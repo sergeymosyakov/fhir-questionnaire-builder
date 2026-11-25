@@ -13,7 +13,7 @@
 
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, openMenu } from './helpers/dropdown.js';
 import { freshStart, openModal } from './helpers/metadata.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
@@ -29,12 +29,7 @@ async function loadFixture(page) {
 test.describe('SDC StructureMap Extract', () => {
   test('StructureMap Extract item is visible in Save menu', async ({ page }) => {
     await loadFixture(page);
-    await expect(async () => {
-      if (!(await page.getByTestId('export-structuremap-extract-item').isVisible())) {
-        await page.getByTestId('export-btn').click();
-      }
-      await expect(page.getByTestId('export-structuremap-extract-item')).toBeVisible();
-    }).toPass();
+    await openMenu(page.getByTestId('export-btn'), page.getByTestId('export-structuremap-extract-item'));
     await page.keyboard.press('Escape');
   });
 

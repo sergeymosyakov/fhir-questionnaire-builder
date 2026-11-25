@@ -22,16 +22,10 @@ import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { commitInput } from './helpers/preview.js';
 
 const FIXTURE = path.resolve('tests/fixtures/obs-extract-e2e.fhir.json');
 const WEIGHT_LOINC = '29463-7';
-
-// Same commit pattern as the other preview-input specs (see e2e.instructions.md).
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-}
 
 async function openModalWithWeight(page) {
   await page.addInitScript(() => localStorage.clear());

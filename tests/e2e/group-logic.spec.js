@@ -106,6 +106,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { pickCustomSelect } from './helpers/dropdown.js';
+import { commitInput } from './helpers/preview.js';
 const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 
 async function loadAnnual(page) {
@@ -113,12 +114,6 @@ async function loadAnnual(page) {
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, ANNUAL);
   await expect(page.locator('[data-preview-id="bmi"]')).toBeVisible({ timeout: 10_000 });
-}
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 test.describe('calculatedExpression — annual-health-check fixture', () => {

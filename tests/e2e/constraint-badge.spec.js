@@ -24,6 +24,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { commitInput } from './helpers/preview.js';
 
 const FIXTURE = path.resolve('tests/fixtures/constraint-badge.fhir.json');
 
@@ -41,16 +42,6 @@ async function loadFixture(page) {
 }
 
 const badge = page => page.getByTestId('status-badge-btn');
-
-// Click the search input to move focus away from the active preview input,
-// firing blur → BaseNode.notifyChanged() → RESPONSE_CHANGED → icon/badge update.
-// Using a real <input> (search box) is more reliable than a span (preview title)
-// because focus transfer to another input guarantees the blur event fires.
-async function commitInput(page, _input) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-}
 
 // ── 1. hasCriteria — badge visibility ─────────────────────────────────────────
 
@@ -73,7 +64,7 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await loadFixture(page);
     const input = page.locator('[data-preview-id="age"] input[type="number"]');
     await input.fill('20');
-    await commitInput(page, input);
+    await commitInput(page);
     await expect(badge(page)).toContainText('PASS');
   });
 
@@ -81,11 +72,11 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await loadFixture(page);
     const input = page.locator('[data-preview-id="age"] input[type="number"]');
     await input.fill('20');
-    await commitInput(page, input);
+    await commitInput(page);
     await expect(badge(page)).toContainText('PASS');
     await input.fill('5');
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-    await commitInput(page, input);
+    await commitInput(page);
     await expect(badge(page)).toContainText('FAIL');
   });
 });
@@ -104,10 +95,10 @@ test.describe('hasCriteria: badge visible for range-only (minValue/maxValue) ite
     const rangeInput = page.locator('[data-preview-id="score-range"] input[type="number"]');
     // Satisfy constraint, then violate the range
     await ageInput.fill('20');
-    await commitInput(page, ageInput);
+    await commitInput(page);
     // Now violate the range — badge must show FAIL
     await rangeInput.fill('200');
-    await commitInput(page, rangeInput);
+    await commitInput(page);
     await expect(badge(page)).toContainText('FAIL');
   });
 
@@ -116,9 +107,9 @@ test.describe('hasCriteria: badge visible for range-only (minValue/maxValue) ite
     const ageInput   = page.locator('[data-preview-id="age"] input[type="number"]');
     const rangeInput = page.locator('[data-preview-id="score-range"] input[type="number"]');
     await ageInput.fill('25');
-    await commitInput(page, ageInput);
+    await commitInput(page);
     await rangeInput.fill('50');
-    await commitInput(page, rangeInput);
+    await commitInput(page);
     await expect(badge(page)).toContainText('PASS');
   });
 });
@@ -138,7 +129,7 @@ test.describe('group icon reflects constraint-only child state', () => {
     const groupOk   = page.locator('[data-preview-id="grp-constraint"] .icon-ok');
     const groupFail = page.locator('[data-preview-id="grp-constraint"] .icon-fail');
     await input.fill('21');
-    await commitInput(page, input);
+    await commitInput(page);
     await expect(groupOk).toBeVisible();
     await expect(groupFail).toHaveCount(0);
   });
@@ -148,10 +139,10 @@ test.describe('group icon reflects constraint-only child state', () => {
     const input   = page.locator('[data-preview-id="age"] input[type="number"]');
     const groupOk = page.locator('[data-preview-id="grp-constraint"] .icon-ok');
     await input.fill('18');
-    await commitInput(page, input);
+    await commitInput(page);
     await expect(groupOk).toBeVisible();
     await input.fill('17');
-    await commitInput(page, input);
+    await commitInput(page);
     await expect(groupOk).not.toBeVisible();
     await expect(page.locator('[data-preview-id="grp-constraint"] .icon-fail')).toBeVisible();
   });

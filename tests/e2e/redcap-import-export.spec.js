@@ -209,16 +209,9 @@ test.describe('REDCap CSV export', () => {
     await pickCustomSelect(page, 'save-format-select', 'R4');
     await page.getByTestId('saveFormatModalApply').click();
 
-    // Either the modal is skipped (no issues → prompt) or shows without REDCap text
-    const modalVisible = await validateModal(page).isVisible({ timeout: 5_000 }).catch(() => false);
-    if (modalVisible) {
-      await expect(validateModal(page)).toBeVisible();
-      await expect(validateModalBody(page)).not.toContainText('REDCap equivalent');
-      await validateModalClose(page).click();
-    } else {
-      // Modal skipped → filename prompt appeared (no REDCap validator ran)
-      await expect(page.getByTestId('prompt-save')).toBeVisible({ timeout: 8_000 });
-      await page.keyboard.press('Escape');
-    }
+    // R4 export has no REDCap issues: no compat modal, straight to the filename prompt
+    await expect(page.getByTestId('prompt-save')).toBeVisible({ timeout: 8_000 });
+    await expect(validateModal(page)).not.toBeVisible();
+    await page.keyboard.press('Escape');
   });
 });
