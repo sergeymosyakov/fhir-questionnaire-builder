@@ -20,12 +20,15 @@
 .check-report-more { margin-top: 2px; padding: 0; border: 0; background: none; color: var(--c-accent, #2563eb); font: inherit; cursor: pointer; }
 .check-report-more:hover { text-decoration: underline; }
 @media print {
-  .check-report-scroll { overflow: visible; }
-  .check-report-table { font-size: 0.7rem; table-layout: fixed; word-break: break-word; }
-  .check-report-table tr { break-inside: avoid; }
-  .check-report-json { max-height: none; white-space: pre-wrap; }
-  .check-report-extra[hidden] { display: list-item; }
-  .check-report-more { display: none; }
+  /* a short summary: the answer-set table (can be thousands of rows), and the questionnaire JSON stay on screen */
+  .check-report-trials-wrap, .check-report-source, .check-report-screen-only { display: none; }
+  .check-report-reads::details-content { content-visibility: visible; display: block; } /* the question lists print open */
+  .check-report-calc { break-inside: avoid; }
+  /* no controls on paper: the list heading is plain text, without the disclosure triangle */
+  .check-report-reads > summary { list-style: none; font-weight: 600; cursor: default; }
+  .check-report-reads > summary::-webkit-details-marker { display: none; }
+  .check-report-answers { padding-left: 16px; font-size: 0.8rem; columns: 2; }
+  .check-report-formula { background: none; border: 1px solid #ccc; }
 }
 
 .check-report-source { margin: 0 0 16px; border: 1px solid #ddd; padding: 6px 10px; }
@@ -34,4 +37,7 @@
 
 .check-report-reads { margin: 4px 0; font-size: 0.9rem; }
 .check-report-reads > summary { cursor: pointer; }
-@media print { .check-report-reads:not([open]) > ul { display: block; } }
+
+.check-report-formula-label { margin: 6px 0 2px; font-size: 0.8rem; font-weight: 600; color: #555; }
+.check-report-formula { margin: 0 0 6px; padding: 6px 8px; background: #f5f5f5; font-size: 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+

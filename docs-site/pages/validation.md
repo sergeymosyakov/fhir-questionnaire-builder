@@ -65,7 +65,7 @@ unanswered, and so on) on every calculation in the form. It then lists:
   such as a number with no minimum and maximum, or a date. Setting a minimum and maximum
   on number questions lets them be checked.
 
-Each row has a ↗ button that jumps to the calculation in the builder. **Open full report** opens a separate page with the questionnaire that was checked (JSON, collapsed), a summary per calculation, and one table of every answer combination that was tried: a row per combination, the answers given, and a column with the result of each calculated field. Use **Print / Save as PDF** there to keep it. The check runs
+Each row has a ↗ button that jumps to the calculation in the builder. **Open full report** opens a separate page with the questionnaire that was checked (JSON, collapsed), a summary per calculation with its formula, and one table of every answer combination that was tried: a row per combination, the answers given, and a column with the result of each calculated field. Use **Print summary** to keep a short printed report (per calculation: verdict, formula, the results that appeared and the ones that never did); the long table of answer combinations and the questionnaire JSON stay on screen so a large form still prints. **Download answer sets (CSV)** gives every answer of every combination, with a column per calculation, for a spreadsheet. The check runs
 entirely in your browser and changes nothing in the questionnaire.
 
 Treat the list as a pointer to review, not a verdict:

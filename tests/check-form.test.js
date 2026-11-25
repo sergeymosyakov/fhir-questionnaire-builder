@@ -52,6 +52,8 @@ describe('check my form', () => {
     const report = buildReport({ tree: questDoc.tree, result, title: 'PHQ-9', questionnaire: { resourceType: 'Questionnaire' } });
     expect(report.questionnaire).toEqual({ resourceType: 'Questionnaire' });
     const ids = report.calcs.map((c) => c.id);
+    expect(report.calcs[1].expression).toContain('< 10'); // the formula as written in the questionnaire
+    expect(report.calcs[1].expression).toContain('Moderate depression');
     expect(ids).toEqual(['phq9-total', 'phq9-severity']);
     expect(report.trials).toHaveLength(report.scenarios);
     expect(report.trials.every((t) => t.results.length === ids.length)).toBe(true); // one column per calculation
@@ -64,7 +66,8 @@ describe('check my form', () => {
     expect(report.trials[0]).toMatchObject({ answers: [], results: [null, null] }); // nothing answered, nothing calculated
     const sev = report.calcs[sevCol];
     expect(sev.missed[0]).toMatchObject({ text: 'Moderate depression', when: 'PHQ-9 total score < 10' });
-    expect(sev.seen.reduce((n, r) => n + r.count, 0)).toBe(report.scenarios);
+    expect(sev.seen).toContain('Mild depression');
+    expect(sev.seen).not.toContain('Moderate depression');
   });
 
   it('finds no problems in any shipped template', async () => {

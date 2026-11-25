@@ -11,12 +11,11 @@ export function buildReport({ tree, result, title, questionnaire = null }) {
   const label = (id, value) => rawOptsToPairs(byId.get(id)?._rawAnswerOptions).find((o) => o.code === value)?.display || String(value);
 
   const calcs = result.calcs.map((c) => {
-    const counts = new Map();
-    for (const t of result.trials) counts.set(t.results[c.id] ?? NONE, (counts.get(t.results[c.id] ?? NONE) ?? 0) + 1);
+    const seen = new Set(result.trials.map((t) => t.results[c.id] ?? NONE));
     return {
-      id: c.id, title: c.title, status: c.status, reason: c.reason ?? null,
+      id: c.id, title: c.title, status: c.status, reason: c.reason ?? null, expression: byId.get(c.id)?._calculatedExpr ?? '',
       reads: c.reads.map(name), missed: c.details ?? [],
-      seen: [...counts].map(([text, count]) => ({ text, count })),
+      seen: [...seen],
     };
   });
   const trials = result.trials.map((t) => ({
