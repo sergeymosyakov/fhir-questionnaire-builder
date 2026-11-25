@@ -8,8 +8,6 @@ import { splitCodes } from './checklist-codec.js';
 
 const ENABLE_WHEN_OPERATORS = new Set(['exists', '=', '!=', '>', '<', '>=', '<=']);
 const ENABLE_WHEN_ANSWER_KEYS = ['answerBoolean', 'answerDecimal', 'answerInteger', 'answerDate', 'answerDateTime', 'answerTime', 'answerString', 'answerCoding', 'answerQuantity', 'answerReference'];
-// System-generated constraint key (must match ITLH_KEY_GROUP_OR in utils.js)
-const _ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
 
 // Known FHIR R4 resource types (common subset used in Questionnaire references)
 const FHIR_R4_RESOURCES = new Set([
@@ -50,7 +48,6 @@ function _collectNodes(nodes, out = []) {
   return out;
 }
 
-// Attempt to compile a JS rule expression. Returns error message or null.
 // Attempt to parse a FHIRPath expression (syntax check only). Returns error message or null.
 function _checkFhirPath(expr) {
   if (!expr || !expr.trim()) return null;
@@ -160,8 +157,6 @@ export function validateTree(tree, _values = {}, questMeta = null) {
         const cLabel = `Constraint "${c.key || '?'}"`;
         if (!c.key || !c.key.trim()) {
           issues.push({ severity: 'error', nodeId: id, message: `A constraint has an empty key — key is required by FHIR R4 (questionnaire-constraint).` });
-        } else if (c.key === _ITLH_KEY_GROUP_OR) {
-          // system-generated key — skip user-facing validation
         }
         if (!c.human || !c.human.trim()) {
           issues.push({ severity: 'warning', nodeId: id, message: `${cLabel} has no human-readable message — the "human" field is required by FHIR R4.` });
@@ -220,12 +215,6 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     );
     if (hasInitial && emitsAnswerOptions(node)) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Initial value is set but the item has answer options — R4 invariant que-11 forbids initial[x] when answerOption[] is present. Use the answer option\'s "Initially selected" setting instead. The initial value will be omitted from the export.' });
-    }
-
-    // questionnaire-unit not allowed on quantity type (R4 invariant: type='integer' or type='decimal')
-    if (node.type === 'item' && node.itemType === 'quantity' && node.quantityUnit
-        && !node._unitOptions?.length && !node._unitValueSet) {
-      // This is auto-fixed on export (converted to unitOption) — no warning needed, handled transparently
     }
 
     // que-3: display items cannot have code[] (R4 invariant)

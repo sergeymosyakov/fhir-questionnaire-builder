@@ -1,6 +1,6 @@
 // ── Base collapsible resource card panel ──────────────────────────────────────
 // Each subclass builds its own card DOM and self-inserts before .left-panel-body.
-// Subclasses override configure(services) and refresh() + _renderChips().
+// Subclasses override refresh() + _renderChips().
 
 const _SVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>`;
 
@@ -66,9 +66,6 @@ export class Panel {
     // Subclasses call refresh() themselves after updating their data
     // in their own QUESTIONNAIRE_LOADED/CLEARED listeners.
   }
-
-  /** Override in subclass — store injected service refs then call refresh(). */
-  configure(_services) {}
 
   /** Override in subclass — rebuild chip list from current data. */
   refresh() {}

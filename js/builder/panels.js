@@ -489,6 +489,5 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   syncActive();
 }
 
-// ── Expression panel ──────────────────────────────────────────────────────────
 // ── Style / Appearance panel ──────────────────────────────────────────────────
 

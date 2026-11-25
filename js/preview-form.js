@@ -34,30 +34,16 @@ function _yield() {
 const hashOf = (str) => { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return h; };
 
 export class PreviewForm {
-  /**
-   * @param {object} deps — injected state
-   * @param {object} deps.questDoc
-   * @param {object} deps.answerStore
-   */
+  /** @param {{ session?, rc?, progress?, notify?, chrome?, previewMode? }} [opts] injected per instance; the defaults serve the app itself */
   constructor(opts = {}) {
     // Session (questDoc + answerStore + bus) — injectable; defaults to the app session.
     this._session = opts.session || defaultSession;
     this._bus = this._session.bus;
-    // Render context — injectable per instance; defaults to the app singleton.
     this._rc = opts.rc || _defaultRc;
     this._rc.bus = this._bus; // nodes wire preview-scoped listeners on this session bus
-    // Progress overlay is an app-level concern — injectable; defaults to a no-op
-    // (app supplies the real one via opts.progress) so preview-form stays free of
-    // the self-initialising progress module.
+    // No-op defaults keep a headless widget free of app-shell modules (overlay, toast, search, status badge, language menu).
     this._progress = opts.progress || { show() {}, hide() {} };
-    // Notifications (errors/info) — injectable; defaults to silent no-op so a
-    // headless widget with no host listener doesn't force a page-blocking toast.
-    // The app supplies the real toast-based notifier (js/ui/toast.js); the
-    // widget supplies one that emits 'error'/'info' events instead.
     this._notify = opts.notify || { error() {}, info() {} };
-    // Preview-panel chrome — injectable; a headless widget uses the no-op defaults.
-    // The app supplies the real search / status-badge / language-menu via chrome so
-    // preview-form stays free of self-initialising app-shell modules.
     this._chrome = { search: { refresh() {} }, statusBadge: { update() {} }, languageMenu: { rebuild() {} }, ...(opts.chrome || {}) };
     // Primary render mount — injectable; defaults to the app's preview-lform.
     this._mountEl = opts.mountEl || null;
@@ -147,26 +133,22 @@ export class PreviewForm {
     // dispatch CALC_RECALC_REQUESTED. Invalidate all render caches so the next
     // _asyncRender does a full rebuild rather than taking the fast/partial path.
     this._bus.on(AppEvents.CALC_RECALC_REQUESTED, () => {
-      this._lastVisibleSig = null;
-      this._lastRepCounts  = null;
-      this._lastRepDataSz  = null;
+      this._invalidateRenderCaches();
       this._calcCache      = null;
     });
     // QR answers load does not dispatch REINIT_FORM — reset caches so the next
     // _asyncRender takes the full-rebuild path and re-renders all controls.
     this._bus.on(AppEvents.QR_LOADED, () => {
-      this._lastVisibleSig = null;
-      this._lastRepCounts  = null;
-      this._lastRepDataSz  = null;
+      this._invalidateRenderCaches();
     });
-    this._bus.on(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
-    this._bus.on(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
+    this._bus.on(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._invalidateRenderCaches(); this._asyncRender(++this._renderVersion); });
+    this._bus.on(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._invalidateRenderCaches(); this._asyncRender(++this._renderVersion); });
     this._bus.on(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
     this._bus.on(AppEvents.STRUCTUREMAP_POPULATE_REQUESTED, e => this._structureMapPopulate(e.detail.patientRef));
     this._bus.on(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
-      this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null;  // text content changes — full rebuild required
+      this._invalidateRenderCaches();
       this._asyncRender(++this._renderVersion);
     });
 
@@ -223,9 +205,7 @@ export class PreviewForm {
     // Clearing the form empties the tree but (unlike load) doesn't dispatch
     // QUESTIONNAIRE_LOADED — rebuild here so the preview reflects the empty tree.
     this._bus.on(AppEvents.QUESTIONNAIRE_CLEARED, () => {
-      this._lastVisibleSig = null;
-      this._lastRepCounts  = null;
-      this._lastRepDataSz  = null;
+      this._invalidateRenderCaches();
       this._asyncRender(++this._renderVersion);
     });
 
@@ -256,9 +236,7 @@ export class PreviewForm {
     // Questionnaire structure changed — all cached state is stale.
     this._calcCache      = null;
     this._pendingCtx     = null;
-    this._lastVisibleSig = null;
-    this._lastRepCounts  = null;
-    this._lastRepDataSz  = null;
+    this._invalidateRenderCaches();
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
     const base = { resourceType: 'Questionnaire', item: [] };
@@ -289,6 +267,13 @@ export class PreviewForm {
 
   // ── Private ─────────────────────────────────────────────────────────────────
 
+  // The next render rebuilds everything instead of taking the fast/partial path.
+  _invalidateRenderCaches() {
+    this._lastVisibleSig = null;
+    this._lastRepCounts  = null;
+    this._lastRepDataSz  = null;
+  }
+
   _onViewPrefChange(e) {
     this._viewPrefs[e.detail.key] = e.detail.value;
     const lform = this._els.lform;
@@ -300,7 +285,7 @@ export class PreviewForm {
       showHiddenItems: 'preview--no-hidden',
     }[e.detail.key];
     if (cls) lform.classList.toggle(cls, !e.detail.value);
-    this._lastVisibleSig = null; this._lastRepCounts = null;  // display mode changed — full rebuild
+    this._invalidateRenderCaches(); // display mode changed — full rebuild
     this._asyncRender(++this._renderVersion);
   }
 
@@ -313,7 +298,7 @@ export class PreviewForm {
       lform.style.display                    = isJson ? 'none' : '';
       if (this._els.fhirJsonView) this._els.fhirJsonView.style.display = isJson ? '' : 'none';
     }
-    this._lastVisibleSig = null; this._lastRepCounts = null;  // mode change — full rebuild
+    this._invalidateRenderCaches(); // mode change — full rebuild
     this._asyncRender(++this._renderVersion);
   }
 
@@ -625,27 +610,14 @@ export class PreviewForm {
     this._bus.dispatch(AppEvents.PREVIEW_RENDER_DONE);
   }
 
-  /**
-   * FHIR base URL — session config override always wins. Falls back to the
-   * app's global Settings-configured server only for the app's own default
-   * session; a widget session must get its FHIR base passed in via config —
-   * it never silently inherits whatever the host page's app Settings has.
-   */
+  // The session config wins; only the app's own session falls back to the Settings server (a widget never inherits it).
   _fhirBase() {
     const fromConfig = this._session.config?.fhirBaseUrl;
     if (fromConfig) return fromConfig;
     return this._session === defaultSession ? serverConfig.get(CONFIG_KEYS.FHIR_BASE) : '';
   }
 
-  /**
-   * Auth header for widget-initiated FHIR calls, when the host manages its own
-   * auth (e.g. the host's own app is already logged into the FHIR server) and
-   * hands the widget a token via config.getAuthToken() instead of letting the
-   * widget run its own OAuth flow. Per-instance — nothing is cached/stored
-   * here, so multiple widgets on one page never share or clobber a token.
-   * Returns null (meaning "use the default OAuth/debug-bridge resolution")
-   * when the app's own session is rendering, or no getAuthToken was supplied.
-   */
+  // A widget host can pass its own token (config.getAuthToken); null means "use the default OAuth resolution". Never cached, so widgets on one page do not share a token.
   async _resolveAuthHeader() {
     if (this._session === defaultSession) return null;
     const getAuthToken = this._session.config?.getAuthToken;

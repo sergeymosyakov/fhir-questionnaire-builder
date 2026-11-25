@@ -1,6 +1,8 @@
 // ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
-import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS, TEMPORAL_BOUND_KEY, emitsAnswerOptions } from './import-helpers.js';import './formats/r4.js';
+import { formatRegistry } from './format-registry.js';
+import { ANSWER_SOURCE_EXPR_EXTS, TEMPORAL_BOUND_KEY, emitsAnswerOptions } from './import-helpers.js';
+import './formats/r4.js';
 import './formats/r4b.js';
 import './formats/r5.js';
 import './formats/redcap.js';

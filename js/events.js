@@ -12,7 +12,7 @@
 //   QR_LOADED                    detail: { status, subject, author, id, language, metaVersionId, metaSource, metaProfile, metaTag, metaSecurity }
 //   SHOW_JSON                    detail: { title, data }
 //   RENUMBER_PROGRESS            detail: { done, total }
-//   QUESTIONNAIRE_RESET          (no detail) — triggers _doReset() in app.js
+//   QUESTIONNAIRE_RESET          (no detail) — the questionnaire loader resets the document
 
 import { defaultBus, createEventState } from './core/events/bus.js';
 

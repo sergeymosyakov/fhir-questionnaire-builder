@@ -50,10 +50,11 @@ export async function loadSettings(userId) {
  */
 export async function saveSettings(userId) {
   const config = supabaseProvider.toJSON();
-  await supabase.from(TABLE).upsert(
+  const { error } = await supabase.from(TABLE).upsert(
     { user_id: userId, server_config: config, updated_at: new Date().toISOString() },
     { onConflict: 'user_id' }
   );
+  if (error) throw new Error(error.message); // the caller tells the user the cloud sync failed
 }
 
 /** Clear the provider cache (call on logout). */

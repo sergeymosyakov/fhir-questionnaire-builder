@@ -154,8 +154,7 @@ function _normaliseItem(item) {
 
 /**
  * Normalise a FHIR STU3 Questionnaire to R4-compatible shape.
- * Returns the original object unchanged if it is already R4.
- * Always operates on a deep clone to avoid mutating the caller's input.\n * Returns the original object unchanged if it is already R4 (no clone needed).
+ * An R4 input is returned unchanged; an STU3 one is converted on a deep clone, so the caller's object is never mutated.
  *
  * @param {object} fhirJson - raw Questionnaire JSON
  * @returns {object} R4-compatible Questionnaire JSON

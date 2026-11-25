@@ -5,16 +5,13 @@ import { rawOptsToPairs } from '../utils.js';
 import { fhirModel } from '../fhir/fhir-model.js';
 import { createMedia } from './media-element.js';
 
-// Evaluate the answer-source expression (SDC answerExpression or
-// candidateExpression) against the current FHIRPath context.
-// Returns [{code, display}] from the expression result, or falls back to
-// node options when the expression is absent, empty, or errors.
-// For external answerValueSet items, reads node._vsCache populated by
-// terminologyService.expandAll() — returns [] if expansion not yet done.
+// The node's own answer options as [{code, display}].
 export function _nodeOpts(node) {
   return rawOptsToPairs(node._rawAnswerOptions);
 }
 
+// Options from the answer-source expression (answerExpression / candidateExpression) against the FHIRPath context;
+// without one: the expanded external value set (_vsCache, [] until expandAll ran), else the node's own options.
 export function _evalAnswerOpts(node, fpCtx) {
   const expr = node._answerExpression || node._candidateExpression;
   if (!expr) {

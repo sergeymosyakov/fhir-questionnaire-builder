@@ -38,11 +38,6 @@ const FHIR_R4_RESOURCES = [
   'VerificationResult','VisionPrescription',
 ];
 
-// ── FHIR resource search ──────────────────────────────────────────────────────
-
-
-
-
 export class ReferenceNode extends ItemNode {
   constructor(data = {}) {
     super(data);

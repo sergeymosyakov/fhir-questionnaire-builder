@@ -91,7 +91,6 @@ export const ITEM_DISABLED_DISPLAY_EXTENSION_URL =
 export function setBuilderVersion(q, code) {
   q.extension = (q.extension || []).filter(e => e?.url !== BUILDER_VERSION_EXTENSION_URL);
   q.extension.push({ url: BUILDER_VERSION_EXTENSION_URL, valueCode: code });
-  if (q.extension.length === 0) delete q.extension;
 }
 
 /** Recursively test whether any item in the tree has the given native field. */

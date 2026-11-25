@@ -78,6 +78,13 @@ describe('saveSettings', () => {
   });
 });
 
+describe('saveSettings failure', () => {
+  it('rejects when the cloud refuses the write, so a failed save is not reported as saved', async () => {
+    h.chain.upsert.mockResolvedValueOnce({ error: { message: 'row level security' } });
+    await expect(saveSettings('u2')).rejects.toThrow('row level security');
+  });
+});
+
 describe('clearSettings', () => {
   it('empties the provider cache', () => {
     supabaseProvider.set('a', '1');
