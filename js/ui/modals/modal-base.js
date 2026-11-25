@@ -117,7 +117,8 @@ export class Modal {
 
   open()  {
     // Remember what had focus so it can be restored on close (a11y).
-    this._prevFocus = (typeof document !== 'undefined' && document.activeElement) || null;
+    const active = (typeof document !== 'undefined' && document.activeElement) || null;
+    if (!(active && this.backdrop.contains(active))) this._prevFocus = active; // not a place inside this modal when it is reopened
     this._stackAboveOpenModals();
     this.backdrop.style.display = 'flex';
     // Move focus into the dialog and trap Tab within it.

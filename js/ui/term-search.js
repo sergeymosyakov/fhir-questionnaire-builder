@@ -210,7 +210,7 @@ export class TermSearch {
     if (!def) return;
 
     this._abortCtrl?.abort();
-    this._abortCtrl = new AbortController();
+    const ctrl = (this._abortCtrl = new AbortController());
     this._setLoading(true);
 
     const gen = ++this._searchGen;
@@ -221,15 +221,17 @@ export class TermSearch {
         if (gen !== this._searchGen) return; // superseded by a newer search
       } else {
         const url = await terminologyService.nlmUrl(def.nlmPath(terms));
-        const res = await fetch(url, { signal: this._abortCtrl.signal });
+        if (gen !== this._searchGen) return;
+        const res = await fetch(url, { signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        if (gen !== this._searchGen) return;
         results = def.parse(data);
       }
       this._results = results;
       this._renderResults();
     } catch (err) {
-      if (err.name === 'AbortError') return;
+      if (err.name === 'AbortError' || gen !== this._searchGen) return;
       this._showStatus('error', 'Search failed. Check your connection.');
     } finally {
       if (gen === this._searchGen) this._setLoading(false);
@@ -277,14 +279,21 @@ export class TermSearch {
     });
   }
 
-  _clearResults() {
+  _wipeResults() {
     this._results = [];
     if (this._resultBox) this._resultBox.innerHTML = '';
   }
 
+  // The user cleared the box: a search still in flight must not bring results back.
+  _clearResults() {
+    this._searchGen++;
+    this._abortCtrl?.abort();
+    this._wipeResults();
+  }
+
   _setLoading(on) {
     this.el.classList.toggle('ts-loading', on);
-    if (on) this._clearResults();
+    if (on) this._wipeResults();
   }
 
   _showStatus(type, msg) {

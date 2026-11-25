@@ -63,6 +63,12 @@ function exceedsItemDepth(items, limit) {
   return limit === 0 || items.some(i => exceedsItemDepth(i?.item, limit - 1));
 }
 
+// A malformed item list is refused before anything of the open form is destroyed.
+function hasMalformedItems(items) {
+  if (items === undefined) return false;
+  return !Array.isArray(items) || items.some(i => !i || typeof i !== 'object' || Array.isArray(i) || hasMalformedItems(i.item));
+}
+
 export function importFHIR(fhirJson, opts = {}) {
   const questDoc = opts.questDoc || EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc;
   const bus = opts.bus || defaultBus;
@@ -77,6 +83,10 @@ export function importFHIR(fhirJson, opts = {}) {
   }
   if (exceedsItemDepth(q.item, MAX_ITEM_DEPTH)) {
     showError(`Questionnaire items are nested deeper than ${MAX_ITEM_DEPTH} levels.`);
+    return false;
+  }
+  if (hasMalformedItems(q.item)) {
+    showError('Questionnaire "item" must be a list of objects.');
     return false;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents

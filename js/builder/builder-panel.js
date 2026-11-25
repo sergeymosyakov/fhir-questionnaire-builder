@@ -14,6 +14,7 @@ import { findAndRemove } from '../utils.js';
 import { ConfirmDialog } from '../ui/confirm-dialog.js';
 import * as progress from '../ui/progress.js';
 import { RenumberControl } from '../ui/renumber-control.js';
+import { dropStaleCards } from './builder-helpers.js';
 
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
@@ -57,6 +58,7 @@ export class BuilderPanel {
     this._container.innerHTML = '';
     for (const node of this._tree) this._container.appendChild(this._renderNode(node));
     this._container.appendChild(makeRootDropZone());
+    dropStaleCards(this._tree);
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RENDER_DONE));
   }
 
@@ -73,6 +75,7 @@ export class BuilderPanel {
     frag.appendChild(makeRootDropZone());
     this._container.innerHTML = '';
     this._container.appendChild(frag);
+    dropStaleCards(this._tree);
   }
 
   async renumberAll() {
@@ -90,6 +93,7 @@ export class BuilderPanel {
     frag.appendChild(makeRootDropZone());
     this._container.innerHTML = '';
     this._container.appendChild(frag);
+    dropStaleCards(this._tree);
     document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_DONE));
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
   }

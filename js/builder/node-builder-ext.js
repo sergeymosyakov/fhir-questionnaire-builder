@@ -16,7 +16,7 @@ import { FHIR } from '../fhir/urls/fhir.js';
 import { ITEM_TYPES, ITEM_TYPE_LABELS } from '../ui/modals/answer-type/data.js';
 import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from '../nodes/change-type.js';
 
-const { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } = bh;
+const { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone, cardSignal } = bh;
 
 // ── BaseNode builder-panel helpers (thin delegators to builder-helpers) ───────
 BaseNode.prototype._buildInlineTitleEditor = function () { return bh.buildInlineTitleEditor(this); };
@@ -142,12 +142,13 @@ GroupNode.prototype.buildBuilder = function () {
   setActive(noteLink, !!node._designNote);
 
   // ⚙ gear menu (Add Group / Add Item / Copy / Paste / Delete)
-  const gear = new NodeGearMenu('group-add-btn', { signal: node._ac?.signal });
-  addMetaRowGearItem(gear, node);
+  const signal = cardSignal(node);
+  const gear = new NodeGearMenu('group-add-btn', { signal });
+  addMetaRowGearItem(gear, node, signal);
   gear.addSep();
   node._addChildGearItems(gear);
   gear.addSep();
-  addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
+  addCopyPasteGearItems(gear, node, BaseNode._hasClipboard, signal);
   gear.addSep();
   gear.addItem('Delete', 'node-delete-btn', () => {
     document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
@@ -460,12 +461,13 @@ ItemNode.prototype.buildBuilder = function () {
   header.appendChild(actions);
 
   // ⚙ gear menu (Add Sub-group / Add Sub-item / Copy / Paste / Delete)
-  const gear = new NodeGearMenu('node-gear-btn', { signal: node._ac?.signal });
-  addMetaRowGearItem(gear, node);
+  const signal = cardSignal(node);
+  const gear = new NodeGearMenu('node-gear-btn', { signal });
+  addMetaRowGearItem(gear, node, signal);
   gear.addSep();
   node._addChildGearItems(gear);
   gear.addSep();
-  addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
+  addCopyPasteGearItems(gear, node, BaseNode._hasClipboard, signal);
   gear.addSep();
   gear.addItem('Delete', 'node-delete-btn', () => {
     document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,

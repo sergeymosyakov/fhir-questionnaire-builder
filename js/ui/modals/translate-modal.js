@@ -38,9 +38,12 @@ export class TranslateModal extends Modal {
     this._questDoc = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc ?? null;
     this._targetLang = '';
     this._reviewRows = [];
+    this._run = null;
     this._renderPicker();
     super.open();
   }
+
+  close() { this._run = null; super.close(); } // a translation still running must not draw into a closed or reopened modal
 
   getName() { return 'translateModal'; }
 
@@ -148,6 +151,7 @@ export class TranslateModal extends Modal {
 
   // ── Phase 2: translate ─────────────────────────────────────────────────────
   async _startTranslation() {
+    const run = (this._run = {});
     const lang     = this._targetLang;
     const qd       = this._questDoc;
     const body     = this.body;
@@ -218,8 +222,10 @@ export class TranslateModal extends Modal {
       const chunk = texts.slice(i, i + BATCH);
       try {
         const translated = await translateBatch(chunk, lang, sourceLang);
+        if (this._run !== run) return;
         results.push(...translated);
       } catch (err) {
+        if (this._run !== run) return;
         showError('Translation failed: ' + err.message);
         this._renderPicker();
         return;
