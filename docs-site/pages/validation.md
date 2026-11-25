@@ -63,8 +63,9 @@ unanswered, and so on) on every calculation in the form. It then lists:
 - **Never shown** — a question whose Show When rule none of the tried answers satisfies, so nobody could answer it. Check the rule.
 - **Never produces a result** — no combination of answers gives the calculation a value.
 - **Not checked** — the calculation reads a question that cannot be tried automatically,
-  such as a number with no minimum and maximum, or a date. Setting a minimum and maximum
-  on number questions lets them be checked.
+  such as a date or a multiple-choice list.
+
+A number question with no minimum or maximum is tried with numbers from 1 to 100 (a fixed spread plus a few hundred repeatable random sets, so the same form always gives the same report; if only one limit is set, the range starts or ends there). If a result needs other numbers, the row says which range was tried: set the minimum and maximum on that question to check it properly. A Show When rule that reads such a number is not judged.
 
 Each row has a ↗ button that jumps to the calculation in the builder. **Open full report** opens a separate page with the questionnaire that was checked (JSON, collapsed), a summary per calculation with its formula, and one table of every answer combination that was tried: a row per combination, the answers given, and a column with the result of each calculated field. Use **Print summary** to keep a short printed report (per calculation: verdict, formula, the results that appeared and the ones that never did); the long table of answer combinations and the questionnaire JSON stay on screen so a large form still prints. **Download answer sets (CSV)** gives every answer of every combination, with a column per calculation, for a spreadsheet. The check runs
 entirely in your browser and changes nothing in the questionnaire.
@@ -98,7 +99,7 @@ The table of combinations has no row with "Moderate depression".
 Treat the list as a pointer to review, not a verdict:
 
 - It only looks at questions outside repeating groups.
-- It follows Show When rules: an answer to a question that is switched off is left out, as a person could not give it. A rule that reads a question it cannot try (a number without a minimum and maximum, or a date) is not judged.
+- It follows Show When rules: an answer to a question that is switched off is left out, as a person could not give it. A rule that reads a question it cannot try (a date, or a number without limits) is not judged.
 - It reads the results a calculation is written to give from its `iif(...)` branches, so a
   result produced another way is not checked.
 - On a very large form not every combination is tried, and the list says so.

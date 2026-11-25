@@ -134,10 +134,11 @@ class CheckFormModal extends Modal {
       const maybe = this._truncated ? ' (not every combination was tried)' : '';
       const lines = c.details.map((d) => `“${d.text}” is given when ${d.when}, but no combination of answers makes that happen`);
       const seen = c.reached.length ? ` Results that do appear: ${c.reached.slice(0, 8).map((r) => `“${r}”`).join(', ')}${c.reached.length > 8 ? ', …' : ''}.` : '';
-      return `${lines.join('; ')}${maybe}.${seen} Check that condition and the ones before it: an earlier condition may already cover every case, or the threshold may be out of range.`;
+      const sampled = c.sampled?.length ? ` Numbers without both limits were tried only in a range (${c.sampled.join(', ')}); a result that needs other numbers can be missed — set the minimum and maximum to check it properly.` : '';
+      return `${lines.join('; ')}${maybe}.${seen}${sampled} Check that condition and the ones before it: an earlier condition may already cover every case, or the threshold may be out of range.`;
     }
     if (c.status === 'never-shown') return `Never shown: its Show When rule (${c.when}) is not met by any of the answers tried, so nobody can answer it. Check the rule.`;
-    if (c.status === 'no-result') return 'No combination of answers gives it a value. Check its formula and the questions it reads.';
+    if (c.status === 'no-result') return `No combination of answers gives it a value. Check its formula and the questions it reads.${c.sampled?.length ? ` (Numbers without both limits were tried only in a range: ${c.sampled.join(', ')}.)` : ''}`;
     if (c.status === 'skipped') return `${LABEL.skipped}: ${c.reason}.`;
     return `${LABEL.ok}.`;
   }

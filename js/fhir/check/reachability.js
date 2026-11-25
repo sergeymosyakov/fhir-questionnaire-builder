@@ -77,7 +77,7 @@ function bandsOf(calc, byId, answerTexts) {
   return [...new Map(bands.map((b) => [b.text, b])).values()];
 }
 
-const KIND = { integer: 'a number without a minimum and maximum', decimal: 'a number without a minimum and maximum', date: 'a date', dateTime: 'a date', checklist: 'a multiple-choice list' };
+const KIND = { date: 'a date', dateTime: 'a date', checklist: 'a multiple-choice list' };
 const describeInput = (d) => `${d.title || d.id} (${KIND[d.itemType] ?? 'a question that cannot be tried automatically'})`;
 
 /**
@@ -101,7 +101,8 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
   }));
   const inputIds = new Set(inputs.map((i) => i.id));
   const calcs = [...byId.values()].filter((n) => n._calculatedExpr);
-  const scenarios = buildScenarios(inputs);
+  const sampledIds = new Set(inputs.filter((i) => i.sampled).map((i) => i.id));
+  const scenarios = buildScenarios(inputs, undefined, calcs.some((c) => dependencies(c, byId).some((d) => sampledIds.has(d.id))));
   const cache = buildCalcCache(tree, variables);
   const passes = topoOrder(buildDepGraph(tree, variables)).cycles.length || variables.length ? 2 : 1; // calculations run in dependency order; a cycle or a variable (not in the graph) needs a second look
 
@@ -145,6 +146,7 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
   }
 
   onProgress?.(scenarios.length, scenarios.length);
+  const sampledOf = (reads) => reads.map((d) => inputs.find((i) => i.id === d.id)).filter((i) => i?.sampled).map((i) => `${byId.get(i.id).title || i.id} (${i.lo}–${i.hi})`); // numbers tried beyond the form's limits
   const report = calcs.map((c) => {
     const title = c.title || c.id;
     const reads = dependencies(c, byId).filter((d) => !d._calculatedExpr);
@@ -153,12 +155,14 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
     const via = dependencies(c, byId).filter((d) => d._calculatedExpr).map((d) => d.id);
     if (unknown.length) return { id: c.id, title, reads: readIds, via, status: 'skipped', reason: `it reads ${unknown.map(describeInput).join(', ')}, which cannot be tried automatically` };
     const got = [...reached.get(c.id)];
-    if (!got.length) return { id: c.id, title, reads: readIds, via, status: 'no-result', reached: got };
+    if (!got.length) return { id: c.id, title, reads: readIds, via, status: 'no-result', reached: got, sampled: sampledOf(reads) };
     const lost = bandsOf(c, byId, answerTexts).filter((b) => !got.includes(b.text));
-    return { id: c.id, title, reads: readIds, via, status: lost.length ? 'unreachable' : 'ok', missed: lost.map((b) => b.text), details: lost, reached: got };
+    const sampled = sampledOf(reads);
+    return { id: c.id, title, reads: readIds, via, status: lost.length ? 'unreachable' : 'ok', missed: lost.map((b) => b.text), details: lost, reached: got, sampled };
   });
   // A question with a Show When rule that no answer set enabled — only judged when every question the rule reads can be tried.
-  const settable = (id) => inputIds.has(id) || byId.get(id)?._calculatedExpr;
+  const settable = (id) => (inputIds.has(id) && !sampledIds.has(id)) // sampled numbers cannot prove a rule unsatisfiable
+    || (byId.get(id)?._calculatedExpr && !dependencies(byId.get(id), byId).some((d) => sampledIds.has(d.id)));
   const inRepeat = new Set();
   walk(tree, (n) => { if (n.type === 'group' && n.repeats) walk(n.children, (c) => inRepeat.add(c.id)); }); // the preview does not evaluate Show When inside a repeating group
   const unshown = !conditional ? [] : [...byId.values()].filter((n) => n.type === 'item' && n.enableWhen?.length && !n.enableWhenExpression
