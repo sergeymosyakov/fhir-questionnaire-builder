@@ -4,12 +4,10 @@
 import { StructureMapEngine } from '../../lib/fhir-structuremap-js.esm.js';
 import { fhirModel } from './fhir-model.js';
 
-const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
-
 /** Builds a StructureMapEngine; pass `overrides.evaluator` to replace the default FHIRPath wiring (e.g. in tests). */
 export function createStructureMapEngine(overrides = {}) {
   return new StructureMapEngine({
-    evaluator: { evaluate: (resource, expr, env) => fhirpath.evaluate(resource, expr, env, fhirModel()) },
+    evaluator: { evaluate: (resource, expr, env) => window.fhirpath.evaluate(resource, expr, env, fhirModel()) }, // read when used: the script may load after this module
     ...overrides,
   });
 }

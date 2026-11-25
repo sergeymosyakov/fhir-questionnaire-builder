@@ -830,3 +830,14 @@ describe('validateTree — value set expansion issue', () => {
     expect(validateTree([item]).some(i => i.nodeId === 'e' && /900 entries/.test(i.message))).toBe(true);
   });
 });
+
+describe('validateTree — injected FHIRPath engine', () => {
+  const node = { id: 'q', type: 'item', itemType: 'integer', title: 'Q', _calculatedExpr: '1 +', children: [] };
+  it('uses the engine it is given for the syntax check', () => {
+    const fp = { compile: () => { throw new Error('boom'); } };
+    expect(validateTree([node], {}, null, { fp }).some((i) => i.message.includes('boom'))).toBe(true);
+  });
+  it('skips the syntax check without an engine', () => {
+    expect(validateTree([node], {}, null, { fp: null }).some((i) => i.message.includes('boom'))).toBe(false);
+  });
+});

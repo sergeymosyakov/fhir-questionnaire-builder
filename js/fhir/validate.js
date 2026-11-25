@@ -49,9 +49,8 @@ function _collectNodes(nodes, out = []) {
 }
 
 // Attempt to parse a FHIRPath expression (syntax check only). Returns error message or null.
-function _checkFhirPath(expr) {
+function _checkFhirPath(expr, fp) {
   if (!expr || !expr.trim()) return null;
-  const fp = window.fhirpath;
   if (!fp || typeof fp.compile !== 'function') return null;
   try {
     fp.compile(expr);
@@ -70,7 +69,8 @@ const _ANSWER_VS_ALLOWED_TYPES = new Set([
   'quantity',                                    // quantity
 ]);
 
-export function validateTree(tree, _values = {}, questMeta = null) {
+/** @param {{ fp?: object }} [opts] the FHIRPath engine for the syntax checks; defaults to the page's, and without one they are skipped */
+export function validateTree(tree, _values = {}, questMeta = null, { fp = typeof window !== 'undefined' ? window.fhirpath : undefined } = {}) {
   const issues = [];
 
   // ── que-0: Questionnaire.name format (root-level, warning only) ───────────
@@ -124,17 +124,17 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     }
 
     // FHIRPath expression errors
-    const fhirPathErr = _checkFhirPath(node._calculatedExpr);
+    const fhirPathErr = _checkFhirPath(node._calculatedExpr, fp);
     if (fhirPathErr) issues.push({ severity: 'error', nodeId: id, message: `Calculated expression error: ${fhirPathErr}` });
 
     // only FHIRPath expressions can be checked here; a FHIR query (application/x-fhir-query) is kept as written
-    const fhirPathAeErr = node._answerExpressionLanguage ? null : _checkFhirPath(node._answerExpression);
+    const fhirPathAeErr = node._answerExpressionLanguage ? null : _checkFhirPath(node._answerExpression, fp);
     if (fhirPathAeErr) issues.push({ severity: 'error', nodeId: id, message: `Answer expression error: ${fhirPathAeErr}` });
 
-    const fhirPathCeErr = node._candidateExpressionLanguage ? null : _checkFhirPath(node._candidateExpression);
+    const fhirPathCeErr = node._candidateExpressionLanguage ? null : _checkFhirPath(node._candidateExpression, fp);
     if (fhirPathCeErr) issues.push({ severity: 'error', nodeId: id, message: `Candidate expression error: ${fhirPathCeErr}` });
 
-    const fhirPathEwErr = _checkFhirPath(node.enableWhenExpression);
+    const fhirPathEwErr = _checkFhirPath(node.enableWhenExpression, fp);
     if (fhirPathEwErr) issues.push({ severity: 'error', nodeId: id, message: `enableWhenExpression error: ${fhirPathEwErr}` });
 
     if (Array.isArray(node.enableWhen)) {
@@ -161,7 +161,7 @@ export function validateTree(tree, _values = {}, questMeta = null) {
         if (!c.human || !c.human.trim()) {
           issues.push({ severity: 'warning', nodeId: id, message: `${cLabel} has no human-readable message — the "human" field is required by FHIR R4.` });
         }
-        const cErr = _checkFhirPath(c.expression);
+        const cErr = _checkFhirPath(c.expression, fp);
         if (cErr) issues.push({ severity: 'error', nodeId: id, message: `${cLabel} expression error: ${cErr}` });
         if (!c.expression || !c.expression.trim()) {
           issues.push({ severity: 'warning', nodeId: id, message: `${cLabel} has an empty expression — it will never be evaluated.` });

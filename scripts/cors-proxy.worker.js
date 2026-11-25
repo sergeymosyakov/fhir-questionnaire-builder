@@ -14,7 +14,7 @@
  * issue #63) — never logged, never stored.
  */
 
-import { ALLOWED_PATHS, MAX_BODY_BYTES, isAllowedOrigin } from './cors-proxy-rules.js';
+import { isAllowedTarget, MAX_BODY_BYTES, isAllowedOrigin } from './cors-proxy-rules.js';
 
 export default {
   async fetch(request) {
@@ -44,7 +44,7 @@ export default {
     if (targetUrl.protocol !== 'https:') {
       return new Response('Only HTTPS targets allowed', { status: 403, headers: corsHeaders(origin) });
     }
-    const pathOk = ALLOWED_PATHS.some(re => re.test(targetUrl.pathname));
+    const pathOk = isAllowedTarget(targetUrl);
     if (!pathOk) {
       return new Response('Target path not allowed', { status: 403, headers: corsHeaders(origin) });
     }

@@ -3,29 +3,16 @@
 // Requires fhirBaseUrl and optional corsProxyUrl from serverConfig.
 import { serverConfig, CONFIG_KEYS, getFhirAuthHeader } from './server-config.js';
 import { getValidAccessToken, refreshAccessToken, clearStoredToken } from './oauth-client.js';
-
-const CORS_ENABLED_HOSTS = [
-  'hapi.fhir.org',
-  'r4.smarthealthit.org',
-  'launch.smarthealthit.org',
-  'test.ahdis.ch',        // Matchbox SDC server
-  'terminology.hl7.org',  // HL7 terminology server
-];
+import { proxyUrl, CORS_ENABLED_HOSTS } from './cors-proxy.js';
 
 /**
- * Proxy a URL through corsProxyUrl if configured and needed.
- * Skips proxy for known CORS-enabled servers.
+ * Proxy a URL through corsProxyUrl if configured and needed (see cors-proxy.js).
  * @param {string} url
+ * @param {string} [corsProxy] defaults to the configured proxy
  * @returns {string}
  */
 export function proxiedUrl(url, corsProxy) {
-  const proxy = ((corsProxy ?? serverConfig.get(CONFIG_KEYS.CORS_PROXY)) || '').replace(/\/$/, '');
-  if (!proxy) return url;
-  try {
-    const { hostname } = new URL(url);
-    if (CORS_ENABLED_HOSTS.includes(hostname)) return url;
-  } catch { /* invalid URL */ }
-  return `${proxy}?url=${encodeURIComponent(url)}`;
+  return proxyUrl(url, corsProxy ?? serverConfig.get(CONFIG_KEYS.CORS_PROXY));
 }
 
 function sameOrigin(a, b) {
