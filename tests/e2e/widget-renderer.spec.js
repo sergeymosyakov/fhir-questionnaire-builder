@@ -4,8 +4,11 @@
 // Uses widget-demo.html (raw-ESM dogfood: annual-health-check in patient mode).
 //
 // Run: npx playwright test tests/e2e/widget-renderer.spec.js
-//   explain-row          row in the Expression Explain modal
-//   rich-tooltip         rich tooltip popup
+//
+// ── data-testid registry ──────────────────────────────────────────────────────
+//   widget-mount         the element the widget renders into (widget-demo.html)
+// The widget has no builder UI: its rendered rows ([data-preview-id]) and window.__widget are the sanctioned preview/runtime exception.
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 
@@ -17,14 +20,15 @@ test.describe('QuestionnaireRenderer widget', () => {
     const mount = page.getByTestId('widget-mount');
     await expect(mount.locator('[data-preview-id]').first()).toBeVisible({ timeout: 10_000 });
     // The annual health check has many items → several rendered rows.
-    expect(await mount.locator('[data-preview-id]').count()).toBeGreaterThan(1);
+    await expect.poll(() => mount.locator('[data-preview-id]').count()).toBeGreaterThan(5);
   });
 
   test('getResponse() returns a QuestionnaireResponse', async ({ page }) => {
     await page.goto(DEMO);
     await page.getByTestId('widget-mount').locator('[data-preview-id]').first().waitFor({ timeout: 10_000 });
-    const rt = await page.evaluate(() => window.__widget.getResponse().resourceType);
-    expect(rt).toBe('QuestionnaireResponse');
+    const qr = await page.evaluate(() => window.__widget.getResponse());
+    expect(qr.resourceType).toBe('QuestionnaireResponse');
+    expect(qr.status).toBeTruthy();
   });
 
   test('setResponse answers round-trip through getResponse', async ({ page }) => {

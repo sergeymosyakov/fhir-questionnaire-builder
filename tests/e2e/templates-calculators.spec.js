@@ -13,18 +13,13 @@
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { commitInput } from './helpers/preview.js';
 
 async function insert(page, id) {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
   await page.getByTestId('tpl-row-' + id).click();
   await page.getByTestId('templatesModalApply').click();
   await expect(page.getByTestId('templatesModal')).toBeHidden();
-}
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 async function type(page, previewId, value) {

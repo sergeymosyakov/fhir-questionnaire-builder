@@ -15,6 +15,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openMenu } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('sampledata/annual-health-check.fhir.json');
 
@@ -24,12 +25,7 @@ async function loadPatientView(page) {
   await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first())
     .toBeVisible({ timeout: 8_000 });
   // Open the preview-mode dropdown retry-safely, then pick Patient View.
-  await expect(async () => {
-    if (!(await page.getByTestId('preview-mode-patient').isVisible())) {
-      await page.getByTestId('preview-mode-btn').click();
-    }
-    await expect(page.getByTestId('preview-mode-patient')).toBeVisible();
-  }).toPass();
+  await openMenu(page.getByTestId('preview-mode-btn'), page.getByTestId('preview-mode-patient'));
   await page.getByTestId('preview-mode-patient').click();
   // Patient view marks unfilled required rows invalid (coloured left border).
   await expect(page.locator('[data-testid="preview-panel"] .lform-item--invalid').first())

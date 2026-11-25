@@ -24,6 +24,7 @@ import { openDropdownItem } from './helpers/dropdown.js';
 import { clickBoolOption, clickAddRootGroup } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
+import { commitInput } from './helpers/preview.js';
 
 const ANNUAL  = path.resolve('sampledata/annual-health-check.fhir.json');
 const CALC    = path.resolve('sampledata/patient-scenario-calc-chain.fhir.json');
@@ -38,13 +39,6 @@ async function freshStart(page) {
 
 async function loadFile(page, filePath) {
   await loadFixtureFile(page, filePath);
-}
-
-/** Commit any pending input changes by yielding two rAF ticks + focusing search box. */
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 /** Activate patient view mode. */

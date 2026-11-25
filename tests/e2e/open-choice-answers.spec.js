@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
+import { commitInput } from './helpers/preview.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/open-choice-answers.fhir.json');
 const BARIATRIC = path.resolve('sampledata/example-bariatric.fhir.json');
@@ -71,13 +72,6 @@ async function exportQR(page) {
     page.getByTestId('qrExportModalApply').click(),
   ]);
   return JSON.parse(readFileSync(await download.path(), 'utf8'));
-}
-
-// Typed values reach enableWhen on commit (blur): clicking the search input is the supported way to blur
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 function findItem(items, linkId) {

@@ -17,6 +17,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup } from './helpers/builder.js';
+import { openMenu } from './helpers/dropdown.js';
 
 const ls = (page, key) => page.evaluate(k => localStorage.getItem(k), key);
 const checkbox = (page, rowTestId) => page.getByTestId(rowTestId).getByRole('checkbox');
@@ -25,12 +26,7 @@ const checkbox = (page, rowTestId) => page.getByTestId(rowTestId).getByRole('che
 // (the toggle flips, so click only while the row is hidden).
 async function openSettings(page) {
   await expect(page.getByTestId('tools-btn')).toBeVisible();
-  await expect(async () => {
-    if (!(await page.getByTestId('settings-tips-check').isVisible())) {
-      await page.getByTestId('tools-btn').click();
-    }
-    await expect(page.getByTestId('settings-tips-check')).toBeVisible();
-  }).toPass();
+  await openMenu(page.getByTestId('tools-btn'), page.getByTestId('settings-tips-check'));
 }
 
 async function reloadAndOpenSettings(page) {

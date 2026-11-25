@@ -26,14 +26,9 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { clickBoolOption, clickAddRootGroup } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { commitInput } from './helpers/preview.js';
 
 const FIXTURE = path.resolve('tests/fixtures/repeating-group-demo.fhir.json');
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-}
 
 async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());

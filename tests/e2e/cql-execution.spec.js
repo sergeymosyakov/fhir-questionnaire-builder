@@ -16,6 +16,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openMenu } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/cql-execution.fhir.json');
 
@@ -27,12 +28,7 @@ async function loadFixture(page) {
 
 /** Open the Patient Context "Custom…" modal, set %age, and Apply (triggers Re-init). */
 async function setPatientAge(page, age) {
-  await expect(async () => {
-    if (!(await page.locator('[data-preset="custom"]').isVisible())) {
-      await page.getByTestId('patient-preset-btn').click();
-    }
-    await expect(page.locator('[data-preset="custom"]')).toBeVisible();
-  }).toPass();
+  await openMenu(page.getByTestId('patient-preset-btn'), page.locator('[data-preset="custom"]'));
   await page.locator('[data-preset="custom"]').click();
   await expect(page.getByTestId('patientCtxModal')).toBeVisible();
   await page.getByTestId('patient-ctx-age').fill(String(age));

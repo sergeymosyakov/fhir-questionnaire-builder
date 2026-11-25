@@ -186,6 +186,7 @@ test.describe('enableWhen (standard)', () => {
 
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { commitInput } from './helpers/preview.js';
 const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 
 async function loadAnnual(page) {
@@ -194,12 +195,6 @@ async function loadAnnual(page) {
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, ANNUAL);
   await expect(page.locator('[data-preview-id="smoker"]')).toBeVisible({ timeout: 8_000 });
-}
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 test.describe('enableWhen — fixture-based (annual-health-check)', () => {

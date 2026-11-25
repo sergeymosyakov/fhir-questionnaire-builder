@@ -11,7 +11,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, openMenu } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/def-extract.fhir.json');
@@ -26,12 +26,7 @@ async function loadFixture(page) {
 test.describe('SDC Definition Extract', () => {
   test('Definition Extract item is visible in Save menu', async ({ page }) => {
     await loadFixture(page);
-    await expect(async () => {
-      if (!(await page.getByTestId('export-def-extract-item').isVisible())) {
-        await page.getByTestId('export-btn').click();
-      }
-      await expect(page.getByTestId('export-def-extract-item')).toBeVisible();
-    }).toPass();
+    await openMenu(page.getByTestId('export-btn'), page.getByTestId('export-def-extract-item'));
     await page.keyboard.press('Escape');
   });
 

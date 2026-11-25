@@ -134,7 +134,9 @@ test.describe('rendering-xhtml — XSS sanitization (additional vectors)', () =>
 
     // The link must not have a javascript: href in the DOM.
     // DOMPurify either removes the href entirely (null) or changes it.
-    const href = await page.locator('[data-preview-id="1.1"] a').getAttribute('href').catch(() => null);
+    const link = page.locator('[data-preview-id="1.1"] a');
+    await expect(link).toContainText('click me'); // the element must be there, or null would pass for the wrong reason
+    const href = await link.getAttribute('href');
     // null = href removed entirely (safe); if present, must not be javascript:
     if (href !== null) {
       expect(href).not.toMatch(/javascript:/i);
@@ -146,8 +148,9 @@ test.describe('rendering-xhtml — XSS sanitization (additional vectors)', () =>
     await buildItemAndOpenAppearance(page);
     await applyXhtml(page, '<span onclick="window.__xss4=1">text</span>');
 
-    const onclick = await page.locator('[data-preview-id="1.1"] span').getAttribute('onclick').catch(() => null);
-    expect(onclick).toBeNull();
+    const span = page.locator('[data-preview-id="1.1"] span', { hasText: 'text' }).first();
+    await expect(span).toBeVisible();
+    expect(await span.getAttribute('onclick')).toBeNull();
   });
 
   test('safe <a href> link is preserved after sanitization', async ({ page }) => {

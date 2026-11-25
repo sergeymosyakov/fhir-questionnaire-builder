@@ -12,6 +12,8 @@
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
 import { serveTemplates } from './helpers/templates.js';
+import { commitInput } from './helpers/preview.js';
+import { openMenu } from './helpers/dropdown.js';
 
 async function setup(page, opts) {
   await page.addInitScript(() => localStorage.clear());
@@ -22,12 +24,7 @@ async function setup(page, opts) {
 
 async function openTemplates(page, nodeId, gearTestid = 'group-add-btn') {
   const node = page.locator(`[data-node-id="${nodeId}"]`).first();
-  await expect(async () => {
-    if (!(await node.getByTestId('add-menu-template').first().isVisible())) {
-      await node.getByTestId(gearTestid).first().click();
-    }
-    await expect(node.getByTestId('add-menu-template').first()).toBeVisible();
-  }).toPass();
+  await openMenu(node.getByTestId(gearTestid).first(), node.getByTestId('add-menu-template').first());
   await node.getByTestId('add-menu-template').first().click();
   await expect(page.getByTestId('templatesModal')).toBeVisible();
 }
@@ -37,12 +34,6 @@ async function insertTestScale(page, nodeId, gearTestid) {
   await page.getByTestId('tpl-row-test-scale').click();
   await page.getByTestId('templatesModalApply').click();
   await expect(page.getByTestId('templatesModal')).toBeHidden();
-}
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 async function fillPreview(page, previewId, value) {

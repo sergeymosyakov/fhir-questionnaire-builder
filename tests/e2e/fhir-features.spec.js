@@ -26,6 +26,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { commitInput } from './helpers/preview.js';
 
 const FIXTURE = path.resolve('tests/fixtures/fhir-features.fhir.json');
 
@@ -266,12 +267,6 @@ test.describe('ordinalValue display', () => {
     await expect(row).toBeVisible();
   });
 });
-
-async function commitInput(page) {
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-}
 
 // ── 5. minLength ──────────────────────────────────────────────────────────────
 

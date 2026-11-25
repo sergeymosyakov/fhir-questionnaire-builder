@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const TEMPLATE = path.resolve('templates/phq-9.template.json');
 
@@ -33,11 +34,7 @@ async function load(page, file, ready = 'phq9-severity') {
 }
 
 async function openCheck(page) {
-  await expect(async () => {
-    if (!(await page.getByTestId('check-form-item').isVisible())) await page.getByTestId('tools-btn').click();
-    await expect(page.getByTestId('check-form-item')).toBeVisible();
-  }).toPass();
-  await page.getByTestId('check-form-item').click();
+  await openDropdownItem(page, 'tools-btn', 'check-form-item');
   await expect(page.getByTestId('checkFormModal')).toBeVisible();
 }
 

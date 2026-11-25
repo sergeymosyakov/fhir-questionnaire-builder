@@ -24,6 +24,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup, clickAddRootGroup } from './helpers/builder.js';
+import { openMenu } from './helpers/dropdown.js';
 
 const DISABLED_RE = /node-gear-menu-item--disabled/;
 
@@ -39,24 +40,14 @@ async function setup(page) {
 // call because clicking an item closes it.
 async function gearAction(page, nodeSel, gearTestid, actionTestid) {
   const node = page.locator(nodeSel).first();
-  await expect(async () => {
-    if (!(await node.getByTestId(actionTestid).first().isVisible())) {
-      await node.getByTestId(gearTestid).first().click();
-    }
-    await expect(node.getByTestId(actionTestid).first()).toBeVisible();
-  }).toPass();
+  await openMenu(node.getByTestId(gearTestid).first(), node.getByTestId(actionTestid).first());
   await node.getByTestId(actionTestid).first().click();
 }
 
 // Open a node's gear menu (without clicking any item) and return the node locator.
 async function openGear(page, nodeSel, gearTestid, probeTestid) {
   const node = page.locator(nodeSel).first();
-  await expect(async () => {
-    if (!(await node.getByTestId(probeTestid).first().isVisible())) {
-      await node.getByTestId(gearTestid).first().click();
-    }
-    await expect(node.getByTestId(probeTestid).first()).toBeVisible();
-  }).toPass();
+  await openMenu(node.getByTestId(gearTestid).first(), node.getByTestId(probeTestid).first());
   return node;
 }
 

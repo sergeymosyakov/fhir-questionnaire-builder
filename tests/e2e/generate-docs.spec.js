@@ -26,7 +26,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, openMenu } from './helpers/dropdown.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
@@ -50,12 +50,7 @@ async function openDocsPage(page) {
 test.describe('Questionnaire Documentation generator', () => {
   test('Generate Docs item is visible in Save menu', async ({ page }) => {
     await loadFixture(page);
-    await expect(async () => {
-      if (!(await page.getByTestId('generate-docs-item').isVisible())) {
-        await page.getByTestId('export-btn').click();
-      }
-      await expect(page.getByTestId('generate-docs-item')).toBeVisible();
-    }).toPass();
+    await openMenu(page.getByTestId('export-btn'), page.getByTestId('generate-docs-item'));
     await page.keyboard.press('Escape');
   });
 

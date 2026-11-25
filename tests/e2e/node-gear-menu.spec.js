@@ -15,6 +15,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { openMenu } from './helpers/dropdown.js';
 
 test.describe('Node gear menu', () => {
   test('group gear exposes Add Group, Add Item and Delete', async ({ page }) => {
@@ -22,12 +23,7 @@ test.describe('Node gear menu', () => {
     await addRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
 
-    await expect(async () => {
-      if (!(await group.getByTestId('add-menu-item').isVisible())) {
-        await group.getByTestId('group-add-btn').click();
-      }
-      await expect(group.getByTestId('add-menu-item')).toBeVisible();
-    }).toPass();
+    await openMenu(group.getByTestId('group-add-btn'), group.getByTestId('add-menu-item'));
 
     await expect(group.getByTestId('add-menu-group')).toHaveText('Add Group');
     await expect(group.getByTestId('add-menu-item')).toHaveText('Add Item');
@@ -40,12 +36,7 @@ test.describe('Node gear menu', () => {
     const itemId = await addItemToGroup(page, '1');
     const item = page.locator(`[data-node-id="${itemId}"]`);
 
-    await expect(async () => {
-      if (!(await item.getByTestId('node-delete-btn').first().isVisible())) {
-        await item.getByTestId('node-gear-btn').click();
-      }
-      await expect(item.getByTestId('node-delete-btn').first()).toBeVisible();
-    }).toPass();
+    await openMenu(item.getByTestId('node-gear-btn'), item.getByTestId('node-delete-btn').first());
 
     await expect(item.getByTestId('node-delete-btn').first()).toHaveText('Delete');
     // Items now support sub-items — Add Item and Add Group are present in their gear
@@ -130,12 +121,7 @@ test.describe('Node gear menu', () => {
 
     // Delete the group — groups use group-add-btn (not node-gear-btn) to open gear
     await page.keyboard.press('Escape');
-    await expect(async () => {
-      if (!(await group.getByTestId('node-delete-btn').first().isVisible())) {
-        await group.getByTestId('group-add-btn').first().click();
-      }
-      await expect(group.getByTestId('node-delete-btn').first()).toBeVisible();
-    }).toPass();
+    await openMenu(group.getByTestId('group-add-btn').first(), group.getByTestId('node-delete-btn').first());
     await group.getByTestId('node-delete-btn').first().click();
 
     await expect(page.getByTestId('delete-confirm-del-btn')).toBeVisible({ timeout: 5_000 });
