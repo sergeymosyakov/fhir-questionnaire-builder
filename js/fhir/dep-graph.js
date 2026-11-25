@@ -95,6 +95,19 @@ export function buildDepGraph(nodes, variables = []) {
     }
   };
 
+  // The linkIds a %variable reads, through the variables it uses in turn
+  const varExpr = new Map((variables || []).filter(v => v && v.name).map(v => [v.name, v.expression]));
+  const varLinkIds = (name, seen = new Set()) => {
+    if (seen.has(name)) return [];
+    seen.add(name);
+    const { linkIds, vars } = extractRefs(varExpr.get(name));
+    return [...linkIds, ...vars.flatMap(v => varLinkIds(v, seen))];
+  };
+
+  const byId = new Map(flat.map(n => [n.id, n]));
+  const usesVar = (id, name) => [byId.get(id)?.enableWhenExpression, byId.get(id)?._calculatedExpr, byId.get(id)?._initialExpr]
+    .some(e => extractRefs(e).vars.includes(name));
+
   for (const node of flat) {
     // 1. enableWhen[] — explicit linkId references via .question
     if (Array.isArray(node.enableWhen)) {
@@ -109,8 +122,13 @@ export function buildDepGraph(nodes, variables = []) {
       node._initialExpr,
     ];
     for (const expr of exprs) {
-      const { linkIds } = extractRefs(expr);
+      const { linkIds, vars } = extractRefs(expr);
       for (const lid of linkIds) addDep(node.id, lid);
+      for (const name of vars) {
+        for (const lid of varLinkIds(name)) { // a variable is evaluated before the calculation that uses it
+          if (!usesVar(lid, name)) addDep(node.id, lid); // an item that uses the variable itself is not a dependency of it
+        }
+      }
     }
   }
 

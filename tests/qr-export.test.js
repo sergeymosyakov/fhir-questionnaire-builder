@@ -149,9 +149,13 @@ describe('exportQR — file download', () => {
     expect(mockAnchor.href).toBe('blob:mock-url');
   });
 
-  it('revokes the blob URL after click', () => {
+  it('revokes the blob URL after click, once the download has started', () => {
+    vi.useFakeTimers();
     exportQR('test.json');
+    expect(revokeObjectURLMock).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1000);
     expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:mock-url');
+    vi.useRealTimers();
   });
 
   it('creates the blob with application/json mime type', () => {

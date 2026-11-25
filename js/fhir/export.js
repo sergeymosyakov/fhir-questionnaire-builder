@@ -188,7 +188,7 @@ export function nodeToFHIRItem(node) {
   // OR-group: auto-generate constraint so round-trip restores logicWithParent
   if (node.type === 'group' && node.logicWithParent === 'OR' && node.children.length > 0) {
     const fp = node.children
-      .map(c => `%resource.item.where(linkId='${c.id.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}').answer.exists()`)
+      .map(c => `%resource.repeat(item).where(linkId='${c.id.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}').answer.exists()`)
       .join(' or ');
     ext.push({
       url: FHIR.constraint,

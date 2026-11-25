@@ -31,6 +31,8 @@ function _yield() {
   return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
+const hashOf = (str) => { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return h; };
+
 export class PreviewForm {
   /**
    * @param {object} deps — injected state
@@ -79,7 +81,7 @@ export class PreviewForm {
     this._pendingCtx     = null;   // result of last _reCalc(), consumed by next _asyncRender
     this._lastVisibleSig = null;   // nodesSig\trepSig fingerprint; fast/partial path when unchanged
     this._lastRepCounts  = null;   // Map<nodeId, length> — used by partial rebuild to detect which row changed
-    this._lastRepDataSz  = null;   // Map<nodeId, JSON-length> — detects data changes inside instances (e.g. enableWhen in gtable)
+    this._lastRepDataSz  = null;   // Map<nodeId, JSON hash> — detects data changes inside instances (e.g. enableWhen in gtable)
     this._els            = {};
 
     // ── Wire _rc (shared context for node classes) ──────────────────────────
@@ -244,7 +246,11 @@ export class PreviewForm {
     this._asyncRender(++this._renderVersion);
   }
 
-  async reinitForm({ silent = false } = {}) {
+  async reinitForm(opts) {
+    try { await this._reinitForm(opts); } catch (err) { this._progress.hide(); this._notify.error(`The preview could not be built: ${err.message}`); }
+  }
+
+  async _reinitForm({ silent = false } = {}) {
     if (!fhirpath) return;
     const progress = this._progress;
     // Questionnaire structure changed — all cached state is stale.
@@ -404,6 +410,10 @@ export class PreviewForm {
   }
 
   async _asyncRender(version) {
+    try { await this._renderAsync(version); } catch (err) { this._progress.hide(); this._notify.error(`The preview could not be rendered: ${err.message}`); }
+  }
+
+  async _renderAsync(version) {
     const _rc = this._rc;
     const progress = this._progress;
     const { search, statusBadge, languageMenu } = this._chrome;
@@ -463,7 +473,7 @@ export class PreviewForm {
     const curCounts = new Map(repNodes.map(r => [r.node.id, this._answerStore.data[r.node.id]?.length ?? 1]));
     // Also track JSON size of instance data so enableWhen changes INSIDE instances
     // (e.g. inside a gtable row) force a partial rebuild rather than a fast path.
-    const dataSzOf  = id => { const d = this._answerStore.data[id]; return d ? JSON.stringify(d).length : 0; };
+    const dataSzOf  = id => { const d = this._answerStore.data[id]; return d ? hashOf(JSON.stringify(d)) : 0; }; // a same-length edit must still change it
     const curDataSz = new Map(repNodes.map(r => [r.node.id, dataSzOf(r.node.id)]));
     const repSig    = repNodes.map(r => `${curCounts.get(r.node.id)}:${curDataSz.get(r.node.id)}`).join(',');
     const visibleSig = nodesSig + '\t' + repSig;

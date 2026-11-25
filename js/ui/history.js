@@ -40,7 +40,8 @@ function _push(json) {
 
 function _takeSnapshot() {
   if (!_buildFn || _restoring) return;
-  _push(JSON.stringify(_buildFn()));
+  const json = JSON.stringify(_buildFn());
+  if (json !== _stack[_cursor]) _push(json); // answering in the preview changes nothing to undo
   _pending = false;
   _notify();
 }

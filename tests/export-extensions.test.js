@@ -609,11 +609,15 @@ describe('exportFHIR', () => {
     });
     vi.stubGlobal('Blob', class MockBlob { constructor(parts, opts) { this.parts = parts; this.type = opts?.type; } });
 
+    vi.useFakeTimers();
     exportFHIR('my-questionnaire.json');
 
     expect(anchor.download).toBe('my-questionnaire.json');
     expect(anchor.click).toHaveBeenCalled();
+    expect(mockRevokeObjectURL).not.toHaveBeenCalled(); // not before the browser has started the download
+    vi.advanceTimersByTime(1000);
     expect(mockRevokeObjectURL).toHaveBeenCalled();
+    vi.useRealTimers();
   });
 });
 

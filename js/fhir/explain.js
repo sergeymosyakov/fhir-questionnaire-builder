@@ -77,9 +77,10 @@ export function parseExprTree(rawExpr) {
   const expr = unwrapOuterParens(rawExpr.trim());
 
   // not(...) — unary node
-  const notMatch = /^not\s*\(([\s\S]+)\)$/i.exec(expr);
-  if (notMatch) {
-    return { type: 'NOT', child: parseExprTree(notMatch[1]) };
+  const notHead = /^not\s*(?=\()/i.exec(expr);
+  if (notHead) {
+    const inner = unwrapOuterParens(expr.slice(notHead[0].length)); // "not(a) and not(b)" is an AND, not one NOT
+    if (inner !== expr.slice(notHead[0].length)) return { type: 'NOT', child: parseExprTree(inner) };
   }
 
   // Split on 'or' first (lower precedence in FHIRPath)

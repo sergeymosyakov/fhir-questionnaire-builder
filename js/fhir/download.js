@@ -9,7 +9,8 @@ function _downloadBlob(blob, fileName) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
+  const url = a.href;
+  setTimeout(() => URL.revokeObjectURL(url), 1000); // revoking at once can cancel the download in some browsers
 }
 
 export function downloadJSON(data, fileName) {

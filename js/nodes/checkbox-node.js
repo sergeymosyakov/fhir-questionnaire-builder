@@ -27,7 +27,7 @@ export class CheckboxNode extends ItemNode {
     const seg = document.createElement('div');
     seg.className = 'bool-seg';
     seg.setAttribute('role', 'group');
-    seg.setAttribute('aria-label', node.text || 'Yes/No question');
+    seg.setAttribute('aria-label', node.title || 'Yes/No question');
 
     const currentVal = getValue(node.id);
 

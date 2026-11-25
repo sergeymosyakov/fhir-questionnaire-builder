@@ -9,7 +9,7 @@ import { VersionCompatChecker, versionCompatRegistry } from '../version-compat-r
 /** Recursively collect linkIds of items that have _answerConstraint set. */
 function _collectAffected(nodes, out) {
   for (const node of nodes) {
-    if (node._answerConstraint) out.push(node.linkId || '(no linkId)');
+    if (node._answerConstraint) out.push(node.id || '(no linkId)');
     if (node.children?.length) _collectAffected(node.children, out);
   }
   return out;

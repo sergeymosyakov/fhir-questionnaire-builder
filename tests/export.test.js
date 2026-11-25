@@ -583,6 +583,7 @@ describe('buildFHIRObject — OR group constraint', () => {
     expect(expr).toContain("linkId='c1'");
     expect(expr).toContain("linkId='c2'");
     expect(expr).toContain(' or ');
+    expect(expr).toContain('%resource.repeat(item)'); // the children sit below the group, not at the top of the response
   });
 
   it('does not export OR-group constraint when logicWithParent is AND', () => {
