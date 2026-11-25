@@ -5,7 +5,7 @@
 // [data-mount] nodes and re-exports update() so existing callers keep working.
 import { AppEvents, EventState } from '../events.js';
 import { defaultBus } from '../core/events/bus.js';
-import { isMandatory, calcFormOk, evalConstraints, CHECKABLE_TYPES } from '../fhir/form-checks.js';
+import { isMandatory, calcFormOk, evalConstraints, CHECKABLE_TYPES, hasValueRule } from '../fhir/form-checks.js';
 
 export class StatusBadge {
   /**
@@ -67,8 +67,7 @@ export class StatusBadge {
     const constraintsAllOk  = constraintItems.every(r => evalConstraints(r.node, fp, qr, cEnv));
 
     const rangeItems = activeItems.filter(r =>
-      !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined ||
-        r.node._maxDecimalPlaces !== undefined || r.node._minLength || r.node._regex ||
+      !isMandatory(r.node) && (hasValueRule(r.node) || store?.get(r.node.id)?.incomplete ||
         // an unanswered optional url/reference/attachment cannot fail, so it adds no criterion
         (store?.get(r.node.id) && (r.node.itemType === 'url' || r.node.referenceResource || r.node._maxFileSizeMB !== undefined)))
     );

@@ -70,15 +70,9 @@ export class ItemNode extends BaseNode {
     const { ctx, cEnv } = rc;
     const constraintPass = this.constraint?.length
       ? rc.evalConstraints(this, ctx.fp, ctx.qr, cEnv) : true;
-    const hasCondition = this.itemType !== 'display' && (
-      (rc.CHECKABLE_TYPES.has(this.itemType) && (rc.isMandatory(this) || this.itemType === 'url')) ||
-      (this._calculatedExpr && this._readOnly && this.itemType === 'checkbox') ||
-      (this.constraint?.length > 0) ||
-      (this._minValue !== undefined || this._maxValue !== undefined) ||
-      (this._maxDecimalPlaces !== undefined) ||
-      (this._regex || this._minLength)
-    );
-    const displayOk = res.ok && rc.calcFormOk(this) && constraintPass;
+    const formOk = rc.calcFormOk(this);
+    const hasCondition = this.itemType !== 'display' && rc.showsCheckIcon(this); // shares its rule list with the group aggregate
+    const displayOk = res.ok && formOk && constraintPass;
     return { hasCondition, displayOk };
   }
 
@@ -342,7 +336,7 @@ export class ItemNode extends BaseNode {
       badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
       badge.dataset.tipTitle = 'Calculated value';
       badge.dataset.tipBody  = 'FHIRPath: ' + this._calculatedExpr + (rc.showExplain ? '\n\nClick to explain.' : '');
-      badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+      badge.dataset.tipFhir  = 'Questionnaire.item.extension[sdc-questionnaire-calculatedExpression].valueExpression';
       badge.dataset.tipSpec  = 'SDC';
       if (rc.showExplain) {
         const expr = this._calculatedExpr;
@@ -377,7 +371,7 @@ export class ItemNode extends BaseNode {
     badge.classList.add('preview-calc-value--explain');
     badge.dataset.tipTitle = 'Calculated value';
     badge.dataset.tipBody  = 'FHIRPath: ' + this._calculatedExpr + '\n\nClick to explain.';
-    badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+    badge.dataset.tipFhir  = 'Questionnaire.item.extension[sdc-questionnaire-calculatedExpression].valueExpression';
     badge.dataset.tipSpec  = 'SDC';
     const expr = this._calculatedExpr;
     badge.addEventListener('click', () => {

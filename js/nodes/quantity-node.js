@@ -46,7 +46,8 @@ export class QuantityNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
-    const current  = getValue(node.id);
+    const stored   = getValue(node.id);
+    const current  = stored?.incomplete ? stored.pending : stored; // a part-filled entry comes back as typed
     const initVal  = current ? (current.value  !== undefined ? current.value : '') : '';
     // When _unitOptions or _unitValueSet is set, default unit comes only from saved answer,
     // not from node.quantityUnit — otherwise the fixed default always overrides the selection.
@@ -102,19 +103,31 @@ export class QuantityNode extends ItemNode {
     const errMsg = document.createElement('span');
     errMsg.className = 'ctrl-err';
 
-    const update = () => {
+    const read = () => {
       const v = numInput.value.trim();
       const u = unitSel.getValue();
       const vNum   = v !== '' ? parseFloat(v) : undefined;
       const hasVal  = vNum !== undefined && !isNaN(vNum);
       const hasUnit = !!u;
+      return { v, u, vNum, hasVal, hasUnit, defaultOnly: !hasVal && hasUnit && u === node.quantityUnit }; // the preset unit alone is an empty field
+    };
+    const showMessage = () => {
+      const { hasVal, hasUnit, defaultOnly } = read();
       if (hasVal && !hasUnit) { errMsg.textContent = 'unit is required'; errMsg.style.display = 'inline'; }
-      else if (!hasVal && hasUnit) { errMsg.textContent = 'value is required'; errMsg.style.display = 'inline'; }
+      else if (!hasVal && hasUnit && !defaultOnly) { errMsg.textContent = 'value is required'; errMsg.style.display = 'inline'; }
       else { errMsg.style.display = 'none'; }
-      setValue(node.id, (hasVal && hasUnit) ? { value: vNum, unit: u, ...unitCoding(u) } : undefined);
+    };
+
+    const update = () => {
+      const { v, u, vNum, hasVal, hasUnit, defaultOnly } = read();
+      showMessage();
+      const partial = (hasVal || hasUnit) && !defaultOnly && !(hasVal && hasUnit);
+      // incomplete is never exported; pending lets a rebuilt preview show what was typed
+      setValue(node.id, (hasVal && hasUnit) ? { value: vNum, unit: u, ...unitCoding(u) } : partial ? { incomplete: true, pending: { value: v, unit: u } } : undefined);
       _reCalc(); onChange();
     };
 
+    if (stored?.incomplete) showMessage(); // a rebuilt preview shows the message again
     numInput.oninput  = update;
     numInput.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 

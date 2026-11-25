@@ -35,7 +35,7 @@ function compareNumbers(a, b, op) {
 // Exported so that base-node.js can reuse it for the condition audit tooltip.
 export function compareValue(val, ew) {
   if (ew.operator === 'exists') {
-    const hasVal = val !== undefined && val !== null && val !== '';
+    const hasVal = val !== undefined && val !== null && val !== '' && !val.incomplete; // a quantity entered in part is no answer
     return ew.answerBoolean !== false ? hasVal : !hasVal;
   }
   // Quantity answers: current value is a { value, unit } object; compare numerically

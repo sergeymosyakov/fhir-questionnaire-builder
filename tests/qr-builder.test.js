@@ -460,3 +460,11 @@ describe('buildQR — fallback branches', () => {
     expect(qr.item[0].answer[0].item).toHaveLength(1);
   });
 });
+
+describe('buildQR — a quantity entered in part', () => {
+  it('exports no answer for it', () => {
+    const base = { resourceType: 'Questionnaire', item: [{ linkId: 'dose', type: 'quantity' }] };
+    const qr = _buildQR(base, { dose: [{ incomplete: true, pending: { value: '5', unit: '' } }] });
+    expect(JSON.stringify(qr)).not.toContain('valueQuantity');
+  });
+});

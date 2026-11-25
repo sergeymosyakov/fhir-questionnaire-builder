@@ -196,6 +196,11 @@ GroupNode.prototype.buildBuilder = function () {
   const logicRow = document.createElement('div');
   logicRow.className = 'logic-row';
   logicRow.textContent = 'Logic between children: ';
+  Object.assign(logicRow.dataset, {
+    tipTitle: 'Logic between children',
+    tipBody: 'AND: every child must pass for the group to pass. OR: one passing child is enough (saved as a constraint on the group).',
+    tipFhir: 'Questionnaire.item.extension[questionnaire-constraint]', tipSpec: 'SDC',
+  });
   const logicSel = createCustomSelect({
     items:    [{ value: 'AND', label: 'AND' }, { value: 'OR', label: 'OR' }],
     value:    node.logicWithParent || 'AND',
@@ -276,6 +281,7 @@ function buildInlineTypeRow(node, setActive) {
     + (isChoice  ? ' node-inline-type-config--attn'   : '')
     + (hasConfig ? ' node-inline-type-config--active'  : '');
   cfg.dataset.testid = 'action-type';
+  cfg.dataset.tipFhir = 'Questionnaire.item.type'; cfg.dataset.tipSpec = 'R4';
   cfg.innerHTML = _TUNE_SVG;
   cfg.dataset.tipTitle = isChoice  ? 'Answer options'
                        : hasConfig ? 'Answer type settings (configured)'

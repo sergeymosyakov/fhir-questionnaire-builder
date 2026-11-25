@@ -3,7 +3,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import {
-  calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, decimalPlaces, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
+  calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, showsCheckIcon, decimalPlaces, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
 } from '../js/fhir/form-checks.js';
 
 // Store stub: get(id) reads from a plain map.
@@ -307,5 +307,31 @@ describe('evalConstraints — evaluation errors', () => {
     expect(evalConstraints(n, fp, {}, {})).toBe(false);
     expect(warn).toHaveBeenCalledOnce();
     warn.mockRestore();
+  });
+});
+
+describe('quantity entered in part', () => {
+  const store = (v) => ({ get: () => v });
+  const q = (over = {}) => ({ id: 'q', type: 'item', itemType: 'quantity', ...over });
+  it('fails, required or not, when only the value or only the unit was given', () => {
+    expect(calcFormOk(q({ mandatory: false }), store({ incomplete: true }))).toBe(false);
+    expect(calcFormOk(q({ mandatory: true }), store({ incomplete: true }))).toBe(false);
+  });
+  it('passes when empty (optional) or complete', () => {
+    expect(calcFormOk(q({ mandatory: false }), store(undefined))).toBe(true);
+    expect(calcFormOk(q({ mandatory: true }), store({ value: 5, unit: 'kg' }))).toBe(true);
+  });
+});
+
+describe('hasEnforceableRule — attachment/reference limits; showsCheckIcon — url and quantity', () => {
+  it('an empty optional url or quantity shows an icon but is not group-relevant', () => {
+    for (const itemType of ['url', 'quantity']) {
+      expect(hasEnforceableRule({ itemType })).toBe(false);
+      expect(showsCheckIcon({ itemType })).toBe(true);
+    }
+  });
+  it('counts a size-limited attachment and a typed reference', () => {
+    expect(hasEnforceableRule({ itemType: 'attachment', _maxFileSizeMB: 1 })).toBe(true);
+    expect(hasEnforceableRule({ itemType: 'reference', referenceResource: 'Patient' })).toBe(true);
   });
 });
