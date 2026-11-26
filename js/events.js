@@ -26,7 +26,7 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_META_CHANGED:    'questionnaire-meta-changed',
   // Dispatched before opening a load dialog when tree may have unsaved items.
   // detail: { resolve: (proceed: boolean) => void }
-  // loadConfirmModal resolves 'proceed' or 'cancel'.
+  // The listener resolves true to proceed, false to cancel.
   QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED: 'questionnaire-load-confirm-requested',
 
   // detail: { data: object, fileName: string }
