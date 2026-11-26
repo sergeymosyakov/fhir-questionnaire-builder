@@ -9,9 +9,9 @@ The right-side **preview panel is a live SDC-compliant runtime**: it executes FH
 > © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov) / [Roko Labs Inc.](https://www.rokolabs.com) — Non-commercial use with attribution. Commercial use requires prior written permission.
 
 <p align="center">
-  <img src="docs/screenshot-builder-desktop.png" alt="Desktop: Logic Builder panel on the left, live Questionnaire Preview on the right, showing conditional logic tags and a filled-in bariatric surgery questionnaire" width="800">
+  <img src="docs/screenshot-builder-desktop.png" alt="Desktop: builder panel on the left, live Questionnaire Preview on the right, showing conditional logic tags and a filled-in bariatric surgery questionnaire" width="800">
 </p>
-<p align="center"><sub>Desktop — Logic Builder (left) + live SDC Questionnaire Preview (right)</sub></p>
+<p align="center"><sub>Desktop — Builder (left) + live SDC Questionnaire Preview (right)</sub></p>
 <p align="center">
   <img src="docs/screenshot-builder-mobile.png" alt="Mobile: responsive single-column preview with a collapsible Builder rail" width="280">
 </p>

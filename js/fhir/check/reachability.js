@@ -1,18 +1,12 @@
 // "Check my form": runs every calculation over generated answer sets and reports text results no answers can produce.
-import { buildCalcCache, buildVarEnv, evalCalcNodes } from '../calc.js';
-import { buildDepGraph, topoOrder } from '../dep-graph.js';
-import { buildQR } from '../qr-builder.js';
 import { rawOptsToPairs } from '../../utils.js';
 import { collectInputs, buildScenarios } from './generators.js';
-import { hasCondition, enabledState, describeWhen } from './enabled.js';
+import { describeWhen } from './enabled.js';
+import { createRunner, walk } from './scenario-runner.js';
 
 const LITERAL = /'((?:[^'\\]|\\.)*)'/g;
 const yieldToUi = () => new Promise((r) => setTimeout(r, 0));
 const SLICE_MS = 40;
-
-function walk(nodes, fn) {
-  for (const n of nodes || []) { fn(n); walk(n.children, fn); }
-}
 
 const literalsOf = (expr) => [...expr.matchAll(LITERAL)].map((m) => m[1]);
 
@@ -81,15 +75,10 @@ const KIND = { checklist: 'a multiple-choice list' };
 const describeInput = (d) => `${d.title || d.id} (${KIND[d.itemType] ?? 'a question that cannot be tried automatically'})`;
 
 /**
- * @param {{ tree: object[], base: object, fp: object, variables?: object[] }} form
- * @returns {Promise<{ scenarios: number, truncated: boolean, unshown: [{ id, title, when }], trials: [{ answers, results }], calcs: object[] }>} calcs: { id, title, status: 'ok'|'unreachable'|'no-result'|'skipped', missed?, details? [{ text, when }], reached?, reason? }
+ * The answer sets worth trying on a form, and the inputs behind them.
+ * @returns {{ inputs: object[], inputIds: Set<string>, sampledIds: Set<string>, scenarios: object[] & { truncated?: boolean } }}
  */
-export async function checkForm({ tree, base, fp, variables = [], onProgress }) {
-  if (!fp) throw new Error('the FHIRPath engine is not loaded');
-  const byId = new Map();
-  walk(tree, (n) => byId.set(n.id, n));
-  const answerTexts = new Set();
-  walk(tree, (n) => rawOptsToPairs(n._rawAnswerOptions).forEach((o) => { answerTexts.add(o.code); answerTexts.add(o.display); }));
+export function planScenarios(tree, byId, calcs) {
   const inputs = collectInputs(tree);
   walk(tree, (n) => (n.enableWhen || []).forEach((ew) => { // a number a Show When rule compares with is a value worth trying
     const v = ew.answerInteger ?? ew.answerDecimal;
@@ -100,49 +89,38 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
     }
   }));
   const inputIds = new Set(inputs.map((i) => i.id));
-  const calcs = [...byId.values()].filter((n) => n._calculatedExpr);
   const numberIds = new Set(inputs.filter((i) => i.sampled && i.kind === 'number').map((i) => i.id));
   const sampledIds = new Set(inputs.filter((i) => i.sampled).map((i) => i.id));
   const scenarios = buildScenarios(inputs, undefined, calcs.some((c) => { const read = dependencies(c, byId).filter((d) => sampledIds.has(d.id)); return read.some((d) => numberIds.has(d.id)) || read.length > 1; }));
-  const cache = buildCalcCache(tree, variables);
-  const passes = topoOrder(buildDepGraph(tree, variables)).cycles.length || variables.length ? 2 : 1; // calculations run in dependency order; a cycle or any variable (which may read another calculation) needs a second pass
+  return { inputs, inputIds, sampledIds, scenarios };
+}
+
+/**
+ * @param {{ tree: object[], base: object, fp: object, variables?: object[] }} form
+ * @returns {Promise<{ scenarios: number, truncated: boolean, unshown: [{ id, title, when }], trials: [{ answers, results }], calcs: object[] }>} calcs: { id, title, status: 'ok'|'unreachable'|'no-result'|'skipped', missed?, details? [{ text, when }], reached?, reason? }
+ */
+export async function checkForm({ tree, base, fp, variables = [], onProgress }) {
+  if (!fp) throw new Error('the FHIRPath engine is not loaded');
+  const byId = new Map();
+  walk(tree, (n) => byId.set(n.id, n));
+  const answerTexts = new Set();
+  walk(tree, (n) => rawOptsToPairs(n._rawAnswerOptions).forEach((o) => { answerTexts.add(o.code); answerTexts.add(o.display); }));
+  const runner = createRunner({ tree, base, fp, variables });
+  const { calcs, conditional } = runner;
+  const { inputs, inputIds, sampledIds, scenarios } = planScenarios(tree, byId, calcs);
 
   const reached = new Map(calcs.map((c) => [c.id, new Set()]));
   const trials = []; // every combination tried, with what each calculation gave
-  const conditional = [...byId.values()].some(hasCondition);
   const enabledEver = new Set(); // questions Show When enabled for at least one answer set
   onProgress?.(0, scenarios.length);
   let sliceStart = Date.now();
   for (let s = 0; s < scenarios.length; s++) {
     if (Date.now() - sliceStart > SLICE_MS) { onProgress?.(s, scenarios.length); await yieldToUi(); sliceStart = Date.now(); } // before the work, so a run of failing scenarios still yields
-    let answers = scenarios[s]; // the answers still enabled by Show When; the rest are dropped, as a person could not give them
-    let results = {};
-    let envVars;
-    let qr;
-    try {
-      for (let round = 0; round < 3; round++) {
-        const values = Object.fromEntries(Object.entries(answers).map(([id, v]) => [id, [v]])); // the answer store keeps a list per question
-        qr = buildQR(base, values);
-        results = {};
-        envVars = buildVarEnv(variables, qr, fp);
-        for (let pass = 0; pass < passes; pass++) { // results are written back into the response, so a later calculation reads an earlier one
-          if (pass && variables.length) envVars = buildVarEnv(variables, qr, fp);
-          evalCalcNodes(tree, qr, fp, results, envVars, base, cache);
-        }
-        if (!conditional) break;
-        const { off, on } = enabledState(tree, { values, results, fp, qr, envVars });
-        const next = Object.fromEntries(Object.entries(scenarios[s]).filter(([id]) => !off.has(id)));
-        const stable = Object.keys(next).sort().join('\n') === Object.keys(answers).sort().join('\n');
-        if (stable || round === 2) { on.forEach((id) => enabledEver.add(id)); break; } // the answers kept always match the results recorded with them
-        answers = next;
-      }
-    } catch (_e) { continue; } // one scenario the engine cannot build must not end the whole check
-    const gave = {};
-    for (const c of calcs) {
-      const v = [results[c.id]].flat()[0];
-      gave[c.id] = v === undefined || v === null || v === '' ? null : String(v);
-      if (gave[c.id] !== null) reached.get(c.id).add(gave[c.id]);
-    }
+    const run = runner.run(scenarios[s]);
+    if (!run) continue;
+    const { answers, gave, qr, on } = run;
+    on?.forEach((id) => enabledEver.add(id));
+    for (const c of calcs) if (gave[c.id] !== null) reached.get(c.id).add(gave[c.id]);
     trials.push({ answers, results: gave, qr }); // qr: the response with the calculated values written in
   }
 

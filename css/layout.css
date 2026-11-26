@@ -13,13 +13,22 @@
   flex-shrink: 0;
   z-index: 100;
 }
-.top-panel-title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .4px;
-  white-space: nowrap;
+.top-panel-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-right: 8px;
   flex-shrink: 0;
+}
+.top-panel-brand-logo { display: block; width: 24px; height: 24px; }
+.top-panel-brand-name {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 .top-panel-sep {
   width: 1px;

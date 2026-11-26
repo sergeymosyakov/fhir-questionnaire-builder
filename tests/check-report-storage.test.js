@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { storeReport, loadReport, CHECK_REPORT_KEY } from '../js/fhir/check/report-storage.js';
+import { storeReport, loadReport, clearReport, CHECK_REPORT_KEY } from '../js/fhir/check/report-storage.js';
 
 const report = { title: 'T', trials: Array.from({ length: 500 }, (_, i) => ({ answers: [`q${i} = a`], results: ['x'], qr: null })) };
 
@@ -7,6 +7,7 @@ function fakeStorage(limit) {
   const m = new Map();
   globalThis.sessionStorage = {
     getItem: (k) => m.get(k) ?? null,
+    removeItem: (k) => m.delete(k),
     setItem: (k, v) => { if (v.length > limit) throw new Error('quota'); m.set(k, v); },
   };
   return m;
@@ -32,6 +33,13 @@ describe('check report storage', () => {
   test('a report too large even packed reports failure', async () => {
     fakeStorage(10);
     expect(await storeReport(report)).toBe(false);
+  });
+
+  test('clearing removes the stored report', async () => {
+    await storeReport(report);
+    clearReport();
+    expect(m.has(CHECK_REPORT_KEY)).toBe(false);
+    expect(await loadReport()).toBeNull();
   });
 
   test('nothing stored reads as null', async () => {

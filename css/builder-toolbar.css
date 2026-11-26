@@ -93,7 +93,7 @@
 }
 .btn-fhir--autosave-toggle:not(.btn-fhir--active):hover { background: #eeeeee; }
 
-/* "tooltips off" badge near Logic Builder title */
+/* "tooltips off" badge near the builder panel title */
 .tips-off-badge {
   font-size: 10px;
   font-weight: 600;

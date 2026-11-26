@@ -7,6 +7,7 @@
   <title>Validation — FHIR Questionnaire Builder Docs</title>
   <meta name="description" content="The builder validates two different things: the questionnaire you are authoring (is it well-formed FHIR?) and the answers entered in the preview (are they complete and valid?).">
   <meta name="keywords" content="FHIR Questionnaire, Validation, How-to Guides, documentation">
+  <meta name="author" content="Sergey Mosyakov, Huthaifa Khan">
   <meta property="og:type"        content="website">
   <meta property="og:title"       content="Validation — FHIR Questionnaire Builder Docs">
   <meta property="og:description" content="The builder validates two different things: the questionnaire you are authoring (is it well-formed FHIR?) and the answers entered in the preview (are they complete and valid?).">
@@ -39,7 +40,19 @@
         "@type": "WebApplication",
         "name": "FHIR Questionnaire Builder",
         "url": "https://fhirbuilder.com/"
-      }
+      },
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Sergey Mosyakov",
+          "url": "https://www.linkedin.com/in/mosyakov/"
+        },
+        {
+          "@type": "Person",
+          "name": "Huthaifa Khan",
+          "url": "https://www.linkedin.com/in/huthaifa-khan-541b282a/"
+        }
+      ]
     },
     {
       "@type": "BreadcrumbList",
@@ -72,6 +85,7 @@
 <body>
   <header class="page-header">
     <div class="page-header-bar">
+      <a class="page-brand" href="../index.html" aria-label="FHIR Questionnaire Builder" data-testid="page-brand"><img class="page-brand-logo" src="../favicon.svg" alt="" width="24" height="24" data-testid="page-brand-logo"><span class="page-brand-name" data-testid="page-brand-name"><span>FHIR Questionnaire</span> <span>Builder</span></span></a>
       <nav class="page-header-crumbs" aria-label="Breadcrumb">
         <a class="page-header-title" href="../docs.html" data-testid="guide-docs-link">📘 Documentation</a>
         <span class="page-header-sep" aria-hidden="true">›</span>
@@ -194,7 +208,10 @@ such as a multiple-choice list.</li>
 <p>A number question with no minimum or maximum is tried with numbers from 1 to 100 (a fixed spread plus a few hundred repeatable random sets, so the same form always gives the same report; if only one limit is set, the range starts or ends there). If a result needs other numbers, the row says which range was tried: set the minimum and maximum on that question to check it properly. A Show When rule that reads such a number is not judged.</p>
 <p>Each row has a ↗ button that jumps to the calculation in the builder. <strong>Open full report</strong> opens a separate page with the questionnaire that was checked (JSON, collapsed), a summary per calculation with its formula, and one table of every answer combination that was tried: a row per combination, the answers given, and a column with the result of each calculated field. Use <strong>Print summary</strong> to keep a short printed report (per calculation: verdict, formula, the results that appeared and the ones that never did); the long table of answer combinations and the questionnaire JSON stay on screen so a large form still prints. <strong>Download answer sets (CSV)</strong> gives every answer of every combination, with a column per calculation, for a spreadsheet. The check runs
 entirely in your browser and changes nothing in the questionnaire.</p>
-<p>You can also check a questionnaire that is not open in the builder: open the report page directly (<code>questionnaire-check.html</code>), then drop a Questionnaire <code>.json</code> file onto it, choose one, or paste its JSON, and press <strong>Check</strong>. A file that is not valid JSON or not a Questionnaire is refused with the reason. The page shows the same report. Above the report title, <strong>Open in builder</strong> sends the checked questionnaire to a new builder tab so you can fix what the report found, and <strong>Save reference file (FHIR Bundle)</strong> saves the checked questionnaire together with every answer combination that was tried, each as a completed QuestionnaireResponse with the calculated values filled in, in one FHIR Bundle (a plain collection of resources, nothing for a server to execute). It records what the form calculated on the day you saved it, so the file can later be compared with an edited version of the form. The usual <strong>← Back to Builder</strong> link is in the page header.</p>
+<p>You can also check a questionnaire that is not open in the builder: open the <a href="https://fhirbuilder.com/questionnaire-check.html" target="_blank" rel="noopener noreferrer">Form Check page</a> directly. It first asks what you want to do: <strong>Check a questionnaire</strong> or <strong>Compare with a saved reference</strong>. After you choose, only the inputs for that choice appear. For a check, drop a Questionnaire <code>.json</code> file onto the page, choose one, or paste its JSON, and press <strong>Check</strong>. A file that is not valid JSON or not a Questionnaire is refused with the reason. The page shows the same report. Above the report title, <strong>Open in builder</strong> sends the checked questionnaire to a new builder tab so you can fix what the report found, and <strong>Save reference file (FHIR Bundle)</strong> saves the checked questionnaire together with every answer combination that was tried, each as a completed QuestionnaireResponse with the calculated values filled in, in one FHIR Bundle (a plain collection of resources, nothing for a server to execute). It records what the form calculated on the day you saved it, so the file can later be compared with an edited version of the form. The usual <strong>← Back to Builder</strong> link is in the page header.</p>
+<h3 id="did-an-edit-change-what-the-form-calculates">Did an edit change what the form calculates?</h3>
+<p>When someone edits a questionnaire, you want to be sure its scores did not change by accident. On the report page, <strong>Save reference file</strong> stores the questionnaire as it is together with every answer combination and what it calculated. Later, open <strong>Compare with a saved reference</strong>, give it the questionnaire as it is now and, next to it, that reference file (each as a file, a dropped file or pasted JSON), and press <strong>Compare</strong>. The answer sets saved in the file are run through both versions and every calculation is compared: if the file holds one response, that is one check. A result the file records is what the form is expected to give; where the file records nothing, the saved form is run today to get it. Tick <strong>Also try the answer sets the check generates</strong> to add the combinations the check would try on the saved and on the edited form: this catches a moved threshold that the saved answers never reach.</p>
+<p>For each calculation the report says whether it is unchanged, changed (with the answers where the result differs, for example “was <em>Moderate depression</em> → now <em>Moderately severe depression</em>”), removed or new. It also shows when the formula was edited but the results stayed the same, and lists changes to the questions: a question that was removed (its answers cannot be used), an answer option that is no longer offered, and a question that is now shown or hidden for different answers. Numbers are compared exactly enough to ignore rounding noise; text must match. Where the result recorded in the file differs from what the saved form gives today (for example because the formula uses today&#39;s date, or the file was written by hand), the report says so. Questions are matched by their link id, so a renamed question counts as a removed one. Answer sets that ran on the saved form but can no longer be run on the current one are counted, and if none can be run at all the comparison stops with an error instead of reporting “unchanged”.</p>
 <h3 id="example-the-phq-9-depression-questionnaire">Example: the PHQ-9 depression questionnaire</h3>
 <p>Load the <strong>PHQ-9</strong> template (Add ▾ → templates). It has two calculated fields: <em>PHQ-9 total score</em>
 (the sum of the nine answers) and <em>Depression severity</em> (a text chosen from the total). Check my form
@@ -278,6 +295,7 @@ errors that must be fixed before exporting.</p>
       <a class="doc-toc-link doc-toc-link--h2" href="#questionnaire-validation-on-import">Questionnaire validation on import</a>
       <a class="doc-toc-link doc-toc-link--h2" href="#external-fhir-validators-optional">External FHIR validators (optional)</a>
       <a class="doc-toc-link doc-toc-link--h2" href="#check-my-form-calculated-results">Check my form (calculated results)</a>
+      <a class="doc-toc-link doc-toc-link--h3" href="#did-an-edit-change-what-the-form-calculates">Did an edit change what the form calculates?</a>
       <a class="doc-toc-link doc-toc-link--h3" href="#example-the-phq-9-depression-questionnaire">Example: the PHQ-9 depression questionnaire</a>
       <a class="doc-toc-link doc-toc-link--h2" href="#quality-audit-advisory-separate-from-validation">Quality audit (advisory, separate from validation)</a>
     </aside>

@@ -6,6 +6,9 @@ import { renderDocAsText } from './fhir/doc-render-text.js';
 import { downloadText } from './fhir/download.js';
 import { buildItemTree } from './fhir/doc-generator.js';
 import { COPYRIGHT_HTML } from './core/copyright.js';
+import { BRAND_NAME } from './core/branding.js';
+
+const SITE_URL = 'https://fhirbuilder.com/';
 
 const STORAGE_KEY = 'fhirqb.generatedDocs';
 
@@ -419,9 +422,13 @@ function render(doc) {
   root.appendChild(el('h3', { text: 'Quality audit' }));
   root.appendChild(renderIssues(doc.audit, 'No issues found.'));
 
-  const footer = el('div', { className: 'qdoc-footer' }, [
-    el('p', { text: `Generated on ${doc.generatedAt} by FHIR Questionnaire Builder` }),
-  ]);
+  const poweredBy = el('p', { text: `Generated on ${doc.generatedAt} by ` });
+  const site = document.createElement('a');
+  site.href = SITE_URL;
+  site.rel = 'noopener';
+  site.textContent = BRAND_NAME;
+  poweredBy.appendChild(site);
+  const footer = el('div', { className: 'qdoc-footer' }, [poweredBy]);
   // Copyright is a fixed, trusted constant (not the sessionStorage copy) — the one
   // deliberate innerHTML use on this page (everything else is textContent).
   const copyrightP = document.createElement('p');
