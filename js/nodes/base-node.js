@@ -48,10 +48,10 @@ export function createWrap() {
 }
 
 // A descendant item is "relevant" to a container's aggregate pass/fail icon only
-// when it carries an enforceable rule; otherwise the "ALL/ANY items" badge and the
-// child AND/OR separators are meaningless and suppressed.
+// when it carries an enforceable rule (or is a quantity left half-filled); otherwise the
+// "ALL/ANY items" badge and the child AND/OR separators are meaningless and suppressed.
 export function isRelevantItem(node, rc) {
-  return rc.hasEnforceableRule(node);
+  return rc.hasEnforceableRule(node) || (node.itemType === 'quantity' && !rc.calcFormOk(node));
 }
 
 // Safe allowlist for node._renderStyle lives in the shared js/fhir/render-style.js parser.

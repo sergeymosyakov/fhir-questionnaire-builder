@@ -116,7 +116,10 @@ export class QuestionnaireRenderer {
   }
 
   _loadQuestionnaire(questionnaire) {
-    importFHIR(questionnaire, { questDoc: this._session.questDoc, bus: this._session.bus });
+    if (importFHIR(questionnaire, { questDoc: this._session.questDoc, bus: this._session.bus }) === false) {
+      Promise.resolve().then(() => this._emitter.emit('error', 'The questionnaire could not be loaded.')); // after the host can subscribe
+      return;
+    }
     this._expandValueSets();
   }
 

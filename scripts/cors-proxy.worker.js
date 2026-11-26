@@ -2,7 +2,7 @@
  * Cloudflare Worker — CORS proxy for FHIR terminology + limited resource
  * requests (Patient search, $populate).
  *
- * Deploy: https://dash.cloudflare.com → Workers → Create → paste this file.
+ * Deploy: wrangler (wrangler.toml, deploy-cors-proxy.yml) — it bundles ./cors-proxy-rules.js.
  * Usage:  GET https://<your-worker>.workers.dev/?url=<encoded-fhir-url>
  *
  * Only proxies HTTPS requests whose path ends in one of ALLOWED_PATHS (the

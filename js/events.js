@@ -26,7 +26,7 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_META_CHANGED:    'questionnaire-meta-changed',
   // Dispatched before opening a load dialog when tree may have unsaved items.
   // detail: { resolve: (proceed: boolean) => void }
-  // loadConfirmModal resolves true if proceed, false if cancel.
+  // loadConfirmModal resolves 'proceed' or 'cancel'.
   QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED: 'questionnaire-load-confirm-requested',
 
   // detail: { data: object, fileName: string }
@@ -190,7 +190,7 @@ export const AppEvents = Object.freeze({
   // Each event carries detail: { resolve: Function } — the listener calls
   // resolve(result) when the user has responded.
   //
-  // CLEAR_CONFIRM_REQUESTED   resolve('proceed' | 'export' | 'cancel')
+  // CLEAR_CONFIRM_REQUESTED   resolve('clear' | 'export' | 'cancel')
   // EXPORT_PROMPT_REQUESTED   resolve() when export is done or skipped
   // VALIDATE_EXPORT_REQUESTED resolve() when validate modal is dismissed
   // AUTOSAVE_CLEAR_DRAFT      (no resolve) — fire-and-forget

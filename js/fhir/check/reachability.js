@@ -105,7 +105,7 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
   const sampledIds = new Set(inputs.filter((i) => i.sampled).map((i) => i.id));
   const scenarios = buildScenarios(inputs, undefined, calcs.some((c) => { const read = dependencies(c, byId).filter((d) => sampledIds.has(d.id)); return read.some((d) => numberIds.has(d.id)) || read.length > 1; }));
   const cache = buildCalcCache(tree, variables);
-  const passes = topoOrder(buildDepGraph(tree, variables)).cycles.length || variables.length ? 2 : 1; // calculations run in dependency order; a cycle, or a variable that reads another calculation, needs a second look
+  const passes = topoOrder(buildDepGraph(tree, variables)).cycles.length || variables.length ? 2 : 1; // calculations run in dependency order; a cycle or any variable (which may read another calculation) needs a second pass
 
   const reached = new Map(calcs.map((c) => [c.id, new Set()]));
   const trials = []; // every combination tried, with what each calculation gave

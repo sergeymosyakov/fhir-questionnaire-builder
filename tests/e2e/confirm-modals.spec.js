@@ -9,19 +9,17 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { openMenu } from './helpers/dropdown.js';
 
 async function askToDelete(page, itemId) {
   const node = page.locator(`[data-node-id="${itemId}"]`);
-  await expect(async () => {
-    if (!(await node.getByTestId('node-delete-btn').isVisible())) await node.getByTestId('node-gear-btn').click();
-    await expect(node.getByTestId('node-delete-btn')).toBeVisible();
-  }).toPass();
+  await openMenu(node.getByTestId('node-gear-btn'), node.getByTestId('node-delete-btn'));
   await node.getByTestId('node-delete-btn').click();
   await expect(page.getByTestId('deleteConfirmModal')).toBeVisible();
 }
 
 test.describe('delete confirmation', () => {
-  test('Escape and Cancel keep the node, Delete removes it', async ({ page }) => {
+  test('Escape, Cancel and the backdrop keep the node, Delete removes it', async ({ page }) => {
     await freshStart(page);
     const groupId = await addRootGroup(page);
     const itemId = await addItemToGroup(page, groupId);
@@ -34,6 +32,11 @@ test.describe('delete confirmation', () => {
 
     await askToDelete(page, itemId);
     await page.getByTestId('delete-confirm-cancel-btn').click();
+    await expect(page.getByTestId('deleteConfirmModal')).not.toBeVisible();
+    await expect(node).toHaveCount(1);
+
+    await askToDelete(page, itemId);
+    await page.getByTestId('deleteConfirmModal').click({ position: { x: 4, y: 4 } });
     await expect(page.getByTestId('deleteConfirmModal')).not.toBeVisible();
     await expect(node).toHaveCount(1);
 
