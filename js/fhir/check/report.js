@@ -3,12 +3,23 @@ import { rawOptsToPairs } from '../../utils.js';
 
 const NONE = 'no result';
 
-export function buildReport({ tree, result, title, questionnaire = null }) {
+const indexById = (tree) => {
   const byId = new Map();
   const walk = (nodes) => (nodes || []).forEach((n) => { byId.set(n.id, n); walk(n.children); });
   walk(tree);
+  return byId;
+};
+
+/** An answer set in the words of the form: "Question = answer" per question. */
+export function answerLines(byId, answers) {
   const name = (id) => byId.get(id)?.title || id;
   const label = (id, value) => rawOptsToPairs(byId.get(id)?._rawAnswerOptions).find((o) => o.code === value)?.display || String(value);
+  return Object.entries(answers).map(([id, v]) => `${name(id)} = ${label(id, v)}`);
+}
+
+export function buildReport({ tree, result, title, questionnaire = null }) {
+  const byId = indexById(tree);
+  const name = (id) => byId.get(id)?.title || id;
 
   const calcs = result.calcs.map((c) => {
     const seen = new Set(result.trials.map((t) => t.results[c.id] ?? NONE));
@@ -19,7 +30,7 @@ export function buildReport({ tree, result, title, questionnaire = null }) {
     };
   });
   const trials = result.trials.map((t) => ({
-    answers: Object.entries(t.answers).map(([id, v]) => `${name(id)} = ${label(id, v)}`),
+    answers: answerLines(byId, t.answers),
     results: result.calcs.map((c) => t.results[c.id] ?? null), // in the order of `calcs`
     qr: t.qr ?? null,
   }));

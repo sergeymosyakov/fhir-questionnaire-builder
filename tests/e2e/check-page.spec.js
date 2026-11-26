@@ -1,8 +1,11 @@
 // ── E2E: Form Check page checks a Questionnaire that was never opened in the builder (#334) ──
 // File choice, pasted JSON, a refused file, and "Open in builder" handing the checked form over.
 // ── data-testid registry ─────────────────────────────────────────────────────
+//   check-mode / check-mode-check / check-mode-compare               what-to-do choice (data-compact once a report shows)
 //   check-upload / -file / -text / -run-btn / -error / -progress   the load block on questionnaire-check.html (-progress while it runs)
 //   check-report-root / -summary / -calc / -empty      the report it draws
+//   check-intro-builder-link                           "open the builder" link of the intro
+//   check-report-reset-btn                             "Clear": back to the start (no report, empty inputs)
 //   check-report-open-btn / -export-btn / -csv-btn     "Open in builder" and "Save reference file" (above the report title) / CSV download
 //   notif-body-error                                   the builder's error dialog (hand-off that is gone)
 // The builder's rendered preview ([data-preview-id]) is the sanctioned preview-panel exception.
@@ -12,6 +15,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 
 const TEMPLATE = path.resolve('templates/phq-9.template.json');
+const choose = (page, mode = 'check') => page.getByTestId(`check-mode-${mode}`).click();
 
 test.describe('Form Check page', () => {
   test.beforeEach(async ({ page }) => {
@@ -23,13 +27,41 @@ test.describe('Form Check page', () => {
     await expect(page.locator('[data-back-link]')).toHaveAttribute('href', 'index.html');
   });
 
-  test('starts empty and offers the load block', async ({ page }) => {
+  test('asks what to do first and shows only the inputs for the choice', async ({ page }) => {
+    await expect(page.getByTestId('check-mode-check')).toBeVisible();
+    await expect(page.getByTestId('check-mode-compare')).toBeVisible();
+    await expect(page.getByTestId('check-upload')).toBeHidden();
+    await expect(page.getByTestId('compare-upload')).toBeHidden();
+    await choose(page, 'check');
     await expect(page.getByTestId('check-upload')).toBeVisible();
+    await expect(page.getByTestId('compare-upload')).toBeHidden();
+    await choose(page, 'compare');
+    await expect(page.getByTestId('compare-upload')).toBeVisible();
+    await expect(page.getByTestId('check-upload')).toBeHidden();
+    await expect(page.getByTestId('check-mode-compare')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('the choice shrinks to tabs above a report, and a tab brings the inputs back', async ({ page }) => {
+    await choose(page);
+    await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
+    await expect(page.getByTestId('check-report-summary')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId('check-mode')).toHaveAttribute('data-compact', 'true');
+    await expect(page.getByTestId('check-upload')).toBeHidden();
+    await expect(page.getByTestId('check-mode-check')).toHaveAttribute('aria-pressed', 'false'); // pressed means its inputs are open
+    await expect(page.getByTestId('check-mode-compare')).toHaveAttribute('aria-pressed', 'false');
+    await choose(page);
+    await expect(page.getByTestId('check-upload')).toBeVisible();
+    await expect(page.getByTestId('check-mode-check')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('starts empty', async ({ page }) => {
     await expect(page.getByTestId('check-report-empty')).toBeVisible();
+    await expect(page.getByTestId('check-intro-builder-link')).toHaveAttribute('href', 'index.html');
     await expect(page.getByTestId('check-report-open-btn')).toHaveCount(0);
   });
 
   test('a chosen file is checked and reported', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
     await expect(page.getByTestId('check-report-summary')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('check-report-calc').first()).toBeVisible();
@@ -37,7 +69,23 @@ test.describe('Form Check page', () => {
     await expect(page.getByTestId('check-report-csv-btn')).toBeVisible();
   });
 
+  test('Clear removes the report and the inputs and goes back to the choice', async ({ page }) => {
+    await choose(page);
+    await page.getByTestId('check-upload-text').fill('{ not json');
+    await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
+    await expect(page.getByTestId('check-report-summary')).toBeVisible({ timeout: 30_000 });
+    await page.getByTestId('check-report-reset-btn').click();
+    await expect(page.getByTestId('check-report-summary')).toHaveCount(0);
+    await expect(page.getByTestId('check-report-empty')).toBeVisible();
+    await expect(page.getByTestId('check-mode')).not.toHaveAttribute('data-compact', 'true');
+    await expect(page.getByTestId('check-upload')).toBeHidden();
+    await choose(page);
+    await expect(page.getByTestId('check-upload-text')).toHaveValue('');
+    expect(await page.evaluate(() => sessionStorage.getItem('fhirqb.checkReport'))).toBeNull();
+  });
+
   test('a running check shows its progress, then the report', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
     await expect(page.getByTestId('check-upload-progress')).toBeVisible();
     await expect(page.getByTestId('check-upload-text')).toBeDisabled(); // no second load while it runs
@@ -48,12 +96,14 @@ test.describe('Form Check page', () => {
   });
 
   test('pasted JSON is checked the same way', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-text').fill(fs.readFileSync(TEMPLATE, 'utf8'));
     await page.getByTestId('check-upload-run-btn').click();
     await expect(page.getByTestId('check-report-summary')).toBeVisible({ timeout: 30_000 });
   });
 
   test('text that is not a Questionnaire is refused with a reason', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-text').fill('{ not json');
     await page.getByTestId('check-upload-run-btn').click();
     await expect(page.getByTestId('check-upload-error')).toBeVisible();
@@ -65,6 +115,7 @@ test.describe('Form Check page', () => {
   });
 
   test('Save reference file downloads a collection Bundle: the Questionnaire, then a QuestionnaireResponse per scenario with the calculated values', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
     await expect(page.getByTestId('check-report-export-btn')).toBeVisible({ timeout: 30_000 });
     const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('check-report-export-btn').click()]);
@@ -79,9 +130,10 @@ test.describe('Form Check page', () => {
   });
 
   test('a refused second file does not leave the first report standing', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
     await expect(page.getByTestId('check-report-summary')).toBeVisible({ timeout: 30_000 });
-    await page.getByTestId('check-upload').locator('summary').click(); // folded away once a report is shown
+    await choose(page); // the inputs are folded away once a report is shown
     await page.getByTestId('check-upload-text').fill('{ not json');
     await page.getByTestId('check-upload-run-btn').click();
     await expect(page.getByTestId('check-upload-error')).toBeVisible();
@@ -97,11 +149,13 @@ test.describe('Form Check page', () => {
   });
 
   test('an empty submit asks for input', async ({ page }) => {
+    await choose(page);
     await page.getByTestId('check-upload-run-btn').click();
     await expect(page.getByTestId('check-upload-error')).toBeVisible();
   });
 
   test('Open in builder hands the checked questionnaire to a new builder tab', async ({ page, context }) => {
+    await choose(page);
     await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
     await expect(page.getByTestId('check-report-open-btn')).toBeVisible({ timeout: 30_000 });
     const [builder] = await Promise.all([context.waitForEvent('page'), page.getByTestId('check-report-open-btn').click()]);

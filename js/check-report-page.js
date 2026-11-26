@@ -1,5 +1,5 @@
 // Form Check Report page: renders the report model the Check my form window left in sessionStorage.
-import { loadReport } from './fhir/check/report-storage.js';
+import { loadReport, clearReport } from './fhir/check/report-storage.js';
 import { AppEvents } from './events.js';
 import { highlightJson } from './utils.js';
 import { runCheck } from './fhir/check/run-check.js';
@@ -7,14 +7,11 @@ import { putHandoff } from './core/questionnaire-handoff.js';
 import { buildReferenceBundle, hasReference } from './fhir/check/reference-bundle.js';
 import { downloadJSON } from './fhir/download.js';
 import { CheckUpload } from './ui/check-upload.js';
-
-const el = (tag, className, text, testid) => {
-  const n = document.createElement(tag);
-  if (className) n.className = className;
-  if (text != null) n.textContent = text;
-  if (testid) n.dataset.testid = testid;
-  return n;
-};
+import { CompareUpload } from './ui/compare-upload.js';
+import { CheckModeSwitch } from './ui/check-mode-switch.js';
+import { renderComparison } from './ui/comparison-report.js';
+import { compareToReference } from './fhir/check/compare.js';
+import { el } from './ui/el.js';
 
 const SHOWN = 5;
 const STATUS = { ok: 'All results reachable', unreachable: 'Some results can never appear', 'no-result': 'Never produces a result', skipped: 'Not checked' };
@@ -109,6 +106,14 @@ function renderTrials(report) {
   return wrap;
 }
 
+// "Clear" brings the page back to its start: no report (a refresh would bring it back from storage), empty inputs.
+function resetButton() {
+  const btn = el('button', 'qdoc-btn', 'Clear', 'check-report-reset-btn');
+  btn.type = 'button';
+  btn.addEventListener('click', () => document.dispatchEvent(new CustomEvent(AppEvents.CHECK_RESET)));
+  return btn;
+}
+
 function render(report) {
   const root = document.getElementById('checkReportRoot');
   root.innerHTML = '';
@@ -126,7 +131,8 @@ function render(report) {
     exp.addEventListener('click', () => downloadJSON(buildReferenceBundle(report), 'form-check-reference.bundle.json'));
     actions.append(exp);
   }
-  if (actions.childElementCount) root.append(actions);
+  actions.append(resetButton());
+  root.append(actions);
   root.append(
     el('h2', 'check-report-form', report.title),
     el('p', 'check-report-summary', `${report.calcs.length} calculations, ${report.scenarios} answer combinations tried${report.truncated ? ' (a very large form, so not all were)' : ''}; ${bad ? `${bad} need attention (calculations and questions that are never shown)` : 'no problems found'}. ${new Date(report.when).toLocaleString()}`, 'check-report-summary'),
@@ -183,8 +189,21 @@ async function openInBuilder(report) {
 
 const fail = (message) => document.dispatchEvent(new CustomEvent(AppEvents.CHECK_FAILED, { detail: { message } }));
 
-document.addEventListener(AppEvents.CHECK_REPORT_READY, (e) => show(e.detail.report));
+document.addEventListener(AppEvents.CHECK_RESET, () => {
+  current = null;
+  csvBtn.hidden = true;
+  reportRoot.replaceChildren(emptyState);
+  clearReport();
+});
+document.addEventListener(AppEvents.CHECK_REPORT_READY, (e) => {
+  try { show(e.detail.report); } catch (err) { current = null; csvBtn.hidden = true; reportRoot.replaceChildren(emptyState); fail(`The report could not be shown: ${err.message}`); return; }
+  document.dispatchEvent(new CustomEvent(AppEvents.CHECK_REPORT_SHOWN, { detail: { mode: 'check' } }));
+});
+let running = false; // one check or comparison at a time: the report is a single page
 document.addEventListener(AppEvents.CHECK_SOURCE_PROVIDED, async (e) => {
+  if (running) { fail('Another check is still running. Wait for it to finish.'); return; }
+  running = true;
+  clearReport(); // a stored report from the builder window would otherwise come back on a refresh
   current = null; // a failed run must not leave the previous form's report, and its buttons, standing
   csvBtn.hidden = true;
   reportRoot.replaceChildren(emptyState);
@@ -194,10 +213,38 @@ document.addEventListener(AppEvents.CHECK_SOURCE_PROVIDED, async (e) => {
       onProgress: (done, total) => document.dispatchEvent(new CustomEvent(AppEvents.CHECK_PROGRESS, { detail: { done, total } })),
     });
     document.dispatchEvent(new CustomEvent(AppEvents.CHECK_REPORT_READY, { detail: { report } }));
-  } catch (err) { fail(`The check could not run: ${err.message}`); }
+  } catch (err) { fail(`The check could not run: ${err.message}`); } finally { running = false; }
 });
 
+document.addEventListener(AppEvents.COMPARE_REPORT_READY, (e) => {
+  current = null;
+  csvBtn.hidden = true;
+  try { reportRoot.replaceChildren(...renderComparison(e.detail.report)); } catch (err) {
+    reportRoot.replaceChildren(emptyState);
+    document.dispatchEvent(new CustomEvent(AppEvents.COMPARE_FAILED, { detail: { message: `The comparison could not be shown: ${err.message}` } }));
+    return;
+  }
+  document.dispatchEvent(new CustomEvent(AppEvents.CHECK_REPORT_SHOWN, { detail: { mode: 'compare' } }));
+});
+document.addEventListener(AppEvents.COMPARE_SOURCES_PROVIDED, async (e) => {
+  if (running) { document.dispatchEvent(new CustomEvent(AppEvents.COMPARE_FAILED, { detail: { message: 'Another check is still running. Wait for it to finish.' } })); return; }
+  running = true;
+  clearReport();
+  current = null;
+  csvBtn.hidden = true;
+  reportRoot.replaceChildren(emptyState);
+  try {
+    const report = await compareToReference({
+      reference: e.detail.reference, current: e.detail.current, tryGenerated: e.detail.tryGenerated, fp: window.fhirpath,
+      onProgress: (done, total) => document.dispatchEvent(new CustomEvent(AppEvents.COMPARE_PROGRESS, { detail: { done, total } })),
+    });
+    document.dispatchEvent(new CustomEvent(AppEvents.COMPARE_REPORT_READY, { detail: { report } }));
+  } catch (err) { document.dispatchEvent(new CustomEvent(AppEvents.COMPARE_FAILED, { detail: { message: err.message } })); } finally { running = false; }
+});
+
+new CheckModeSwitch();
 new CheckUpload();
+new CompareUpload();
 
 loadReport() // left by the builder's Check my form window
   .then((report) => { if (report) document.dispatchEvent(new CustomEvent(AppEvents.CHECK_REPORT_READY, { detail: { report } })); })

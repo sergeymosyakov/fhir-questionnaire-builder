@@ -7,6 +7,7 @@
   <title>FHIRPath Calculation Gallery | FHIR Questionnaire Builder</title>
   <meta name="description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.">
   <meta name="keywords" content="FHIR Questionnaire, FHIRPath, calculatedExpression, SDC, clinical calculator, BMI, eGFR, Glasgow Coma Scale, FHIR form builder">
+  <meta name="author" content="Sergey Mosyakov, Huthaifa Khan">
   <meta property="og:type"        content="website">
   <meta property="og:title"       content="FHIRPath Calculation Gallery for FHIR Questionnaires">
   <meta property="og:description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.">
@@ -41,7 +42,19 @@
       },
       "mainEntity": {
         "@id": "https://fhirbuilder.com/gallery.html#list"
-      }
+      },
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Sergey Mosyakov",
+          "url": "https://www.linkedin.com/in/mosyakov/"
+        },
+        {
+          "@type": "Person",
+          "name": "Huthaifa Khan",
+          "url": "https://www.linkedin.com/in/huthaifa-khan-541b282a/"
+        }
+      ]
     },
     {
       "@type": "ItemList",
@@ -285,6 +298,7 @@
 <body>
   <header class="page-header">
     <div class="page-header-bar">
+      <a class="page-brand" href="index.html" aria-label="FHIR Questionnaire Builder" data-testid="page-brand"><img class="page-brand-logo" src="favicon.svg" alt="" width="24" height="24" data-testid="page-brand-logo"><span class="page-brand-name" data-testid="page-brand-name"><span>FHIR Questionnaire</span> <span>Builder</span></span></a>
       <a class="page-header-title" href="gallery.html">Calculation gallery</a>
       <a class="page-header-back" href="index.html" data-testid="gp-open-builder">← Back to Builder</a>
     </div>
@@ -620,7 +634,7 @@
     </section>
   </main>
   <footer class="page-footer" data-testid="page-footer">
-    <nav aria-label="Site"><a href="index.html">Builder</a><a href="templates.html">Templates</a><a href="gallery.html">Calculation gallery</a><a href="docs.html">Documentation</a><a href="help.html">FHIR field reference</a><a href="widget-demo.html">Embeddable widget</a><a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" rel="noopener">GitHub</a></nav>
+    <nav aria-label="Site"><a href="index.html">Builder</a><a href="templates.html">Templates</a><a href="gallery.html">Calculation gallery</a><a href="docs.html">Documentation</a><a href="questionnaire-check.html">Form Check</a><a href="help.html">FHIR field reference</a><a href="widget-demo.html">Embeddable widget</a><a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" rel="noopener">GitHub</a></nav>
   </footer>
 </body>
 </html>

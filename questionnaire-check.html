@@ -4,7 +4,74 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob: https://avatars.githubusercontent.com;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form Check Report — FHIR Questionnaire Builder</title>
+  <title>FHIR Questionnaire Calculation Checker | FHIR Questionnaire Builder</title>
+  <meta name="description" content="Free online checker for FHIR Questionnaires: find calculation results nobody can get, and compare an edited form with a saved reference to catch changed scores.">
+  <meta name="author" content="Sergey Mosyakov, Huthaifa Khan">
+  <meta name="keywords" content="FHIR Questionnaire, calculatedExpression, FHIRPath, test questionnaire calculations, questionnaire scoring, compare questionnaire versions, SDC, FHIR form builder">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Test and Compare FHIR Questionnaire Calculations">
+  <meta property="og:description" content="Free online checker for FHIR Questionnaires: find calculation results nobody can get, and compare an edited form with a saved reference to catch changed scores.">
+  <meta property="og:url"         content="https://fhirbuilder.com/questionnaire-check.html">
+  <meta property="og:image"       content="https://fhirbuilder.com/docs/social-preview.png">
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Test and Compare FHIR Questionnaire Calculations">
+  <meta name="twitter:description" content="Free online checker for FHIR Questionnaires: find calculation results nobody can get, and compare an edited form with a saved reference to catch changed scores.">
+  <meta name="twitter:image"       content="https://fhirbuilder.com/docs/social-preview.png">
+  <link rel="canonical" href="https://fhirbuilder.com/questionnaire-check.html">
+  <link rel="sitemap" type="application/xml" href="sitemap.xml">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://fhirbuilder.com/questionnaire-check.html#page",
+      "url": "https://fhirbuilder.com/questionnaire-check.html",
+      "name": "Test and Compare FHIR Questionnaire Calculations",
+      "description": "Free online checker for FHIR Questionnaires: find calculation results nobody can get, and compare an edited form with a saved reference to catch changed scores.",
+      "inLanguage": "en",
+      "breadcrumb": {
+        "@id": "https://fhirbuilder.com/questionnaire-check.html#breadcrumb"
+      },
+      "isPartOf": {
+        "@type": "WebApplication",
+        "name": "FHIR Questionnaire Builder",
+        "url": "https://fhirbuilder.com/"
+      },
+      "author": [
+        {
+          "@type": "Person",
+          "name": "Sergey Mosyakov",
+          "url": "https://www.linkedin.com/in/mosyakov/"
+        },
+        {
+          "@type": "Person",
+          "name": "Huthaifa Khan",
+          "url": "https://www.linkedin.com/in/huthaifa-khan-541b282a/"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://fhirbuilder.com/questionnaire-check.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "FHIR Questionnaire Builder",
+          "item": "https://fhirbuilder.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Form Check",
+          "item": "https://fhirbuilder.com/questionnaire-check.html"
+        }
+      ]
+    }
+  ]
+}
+  </script>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/page-header.css">
   <link rel="stylesheet" href="css/questionnaire-docs.css">
@@ -14,21 +81,46 @@
 <body>
   <div class="page-header qdoc-no-print">
     <div class="page-header-bar">
-      <h1 class="page-header-title">Form Check Report</h1>
+      <!-- gen:site-brand -->
+      <a class="page-brand" href="index.html" aria-label="FHIR Questionnaire Builder" data-testid="page-brand"><img class="page-brand-logo" src="favicon.svg" alt="" width="24" height="24" data-testid="page-brand-logo"><span class="page-brand-name" data-testid="page-brand-name"><span>FHIR Questionnaire</span> <span>Builder</span></span></a>
+      <!-- /gen:site-brand -->
+      <h1 class="page-header-title">Form Check</h1>
       <div class="qdoc-actions">
         <button type="button" class="qdoc-btn" data-testid="check-report-csv-btn" hidden>&#x2B07; Download answer sets (CSV)</button>
         <button type="button" class="qdoc-btn" data-testid="check-report-print-btn">&#x1F5A8;&#xFE0F; Print summary</button>
       </div>
       <a href="index.html" class="page-header-back" target="_parent" data-back-link>&larr; Back to Builder</a>
     </div>
-    <p class="page-header-subtitle">What the check calculated: for every calculation, each result that appeared with sample answers that give it, and the results that never appeared.</p>
+    <p class="page-header-subtitle">Test what a questionnaire calculates: try many answers, see every result a calculation can give and the ones it never can, and compare an edited form with a saved reference.</p>
   </div>
+
+  <div class="check-mode-mount qdoc-no-print" data-mount="check-mode"></div>
 
   <div class="check-upload-mount qdoc-no-print" data-mount="check-upload"></div>
 
+  <div class="check-upload-mount qdoc-no-print" data-mount="compare-upload"></div>
+
   <div id="checkReportRoot" class="qdoc-root" data-testid="check-report-root">
-    <p class="qdoc-empty" data-testid="check-report-empty">Nothing has been checked yet. Choose a Questionnaire above, or open the builder's Settings &#x25BE; &rarr; Check my form&hellip; window.</p>
+    <div class="qdoc-empty check-intro" data-testid="check-report-empty">
+      <h2>What is Form Check?</h2>
+      <p>Form Check tests what a questionnaire <strong>calculates</strong> (scores, severity bands, totals) without anyone filling it in by hand. It tries many combinations of answers and shows what each calculation gives. It runs in your browser: nothing is uploaded and the questionnaire is not changed.</p>
+      <dl>
+        <dt>Check a questionnaire</dt>
+        <dd>Drop a Questionnaire <code>.json</code> file. For every calculation you see the results it can give, the results it can never give (for example a severity band whose threshold was mistyped), the questions whose Show When rule is never met, and every answer combination that was tried (as a table, and as a CSV).</dd>
+        <dt>Save reference file</dt>
+        <dd>After a check, save the questionnaire together with all the answers that were tried and what the form calculated for them, as one file. It is a snapshot of “this is how the form should calculate today”.</dd>
+        <dt>Compare with a saved reference</dt>
+        <dd>When someone has edited the questionnaire, give the edited form and the reference file. The same answers are run through both versions, and you see which calculations changed (with the answers and “was → now”), which questions were removed or lost an answer option, and which formulas were edited.</dd>
+      </dl>
+      <p class="check-intro-note">Choose what to do above. Or <a href="index.html" target="_parent" data-testid="check-intro-builder-link">open the builder</a>: first open the questionnaire there (load a file or pick one from the library), then use Settings &#x25BE; &rarr; Check my form&hellip;. Its report opens here.</p>
+    </div>
   </div>
+
+<!-- gen:site-footer -->
+  <footer class="page-footer" data-testid="page-footer">
+    <nav aria-label="Site"><a href="index.html">Builder</a><a href="templates.html">Templates</a><a href="gallery.html">Calculation gallery</a><a href="docs.html">Documentation</a><a href="questionnaire-check.html">Form Check</a><a href="help.html">FHIR field reference</a><a href="widget-demo.html">Embeddable widget</a><a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" rel="noopener">GitHub</a></nav>
+  </footer>
+<!-- /gen:site-footer -->
 
   <script src="lib/dompurify.min.js"></script>
   <script src="lib/fhirpath.min.js"></script>

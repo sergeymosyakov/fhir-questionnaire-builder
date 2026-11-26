@@ -1,7 +1,8 @@
-// Regenerates guide/<id>.html (crawlable twins of the docs-viewer pages), the static sidebar links in docs.html and the static rows of help.html, the shared site footer of help.html and widget-demo.html; adds missing sitemap entries.
+// Regenerates guide/<id>.html (crawlable twins of the docs-viewer pages), the static sidebar links in docs.html and the static rows of help.html, the shared brand mark and site footer of the hand-authored pages; adds missing sitemap entries.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { renderDocMarkdown, renderGuidePage, renderNavHtml } from '../js/fhir/docs-pages.js';
 import { siteFooter } from '../js/fhir/static-page.js';
+import { brandLinkHtml } from '../js/core/branding.js';
 import { withStaticRows } from '../js/fhir/help-rows.js';
 import { ensureSitemapUrls } from './lib/sitemap.mjs';
 
@@ -22,13 +23,19 @@ const docs = readFileSync(path('docs.html'), 'utf8');
 const nav = renderNavHtml(manifest, { hrefOf: (p) => `guide/${p.id}.html` });
 writeFileSync(path('docs.html'), docs.replace(/(<nav id="docSidebar"[^>]*>)[\s\S]*?(<\/nav>)/, `$1\n${nav}\n    $2`));
 
-// Hand-authored pages (help.html, widget-demo.html) get the shared site footer between markers.
+// Hand-authored pages get the shared brand mark and site footer between markers.
+const BRAND_RE = /<!-- gen:site-brand -->[\s\S]*?<!-- \/gen:site-brand -->/;
 const FOOTER_RE = /<!-- gen:site-footer -->[\s\S]*?<!-- \/gen:site-footer -->/;
-const withFooter = (html) => html.replace(FOOTER_RE, `<!-- gen:site-footer -->\n${siteFooter()}\n<!-- /gen:site-footer -->`);
-writeFileSync(path('widget-demo.html'), withFooter(readFileSync(path('widget-demo.html'), 'utf8')));
+const decorate = (html) => html
+  .replace(BRAND_RE, `<!-- gen:site-brand -->\n      ${brandLinkHtml()}\n      <!-- /gen:site-brand -->`)
+  .replace(FOOTER_RE, `<!-- gen:site-footer -->\n${siteFooter()}\n<!-- /gen:site-footer -->`);
+for (const file of ['widget-demo.html', 'questionnaire-check.html', 'docs.html', 'settings.html', 'questionnaire-docs.html']) { // the brand mark; footers only where the markers are
+  writeFileSync(path(file), decorate(readFileSync(path(file), 'utf8')));
+}
 
 // help.html: the field reference rows, pre-rendered (the page script re-renders them for search).
-writeFileSync(path('help.html'), withFooter(withStaticRows(readFileSync(path('help.html'), 'utf8'))));
+writeFileSync(path('help.html'), decorate(withStaticRows(readFileSync(path('help.html'), 'utf8'))));
 
 ensureSitemapUrls(path('sitemap.xml'), pages.map((p) => `https://fhirbuilder.com/guide/${p.id}.html`), { priority: '0.7' });
 ensureSitemapUrls(path('sitemap.xml'), ['https://fhirbuilder.com/widget-demo.html'], { priority: '0.7' });
+ensureSitemapUrls(path('sitemap.xml'), ['https://fhirbuilder.com/questionnaire-check.html'], { priority: '0.8' });

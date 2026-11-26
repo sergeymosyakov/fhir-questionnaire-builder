@@ -15,6 +15,10 @@ export async function storeReportPacked(report) {
 
 export const storeReport = async (report) => storeReportPlain(report) || storeReportPacked(report);
 
+export function clearReport() {
+  try { sessionStorage.removeItem(CHECK_REPORT_KEY); } catch { /* storage unavailable */ }
+}
+
 /** @returns {Promise<object|null>} */
 export async function loadReport() {
   const raw = sessionStorage.getItem(CHECK_REPORT_KEY);

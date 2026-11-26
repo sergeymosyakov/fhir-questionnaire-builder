@@ -110,3 +110,12 @@
   color: #6b7280;
   min-height: 14px;
 }
+
+/* Brand mark at the start of every public page header: the logo and the name in two lines, which fits a phone. */
+.page-brand { display: inline-flex; align-items: center; gap: 8px; flex: none; color: #111827; font-size: 12px; font-weight: 700; text-decoration: none; }
+.page-brand-name { display: flex; flex-direction: column; line-height: 1.2; }
+@media (min-width: 640px) {
+  .page-brand { padding-right: 16px; border-right: 1px solid #e5e7eb; }
+}
+.page-brand[hidden] { display: none; } /* hidden when the page is embedded in a modal */
+.page-brand-logo { display: block; width: 24px; height: 24px; }

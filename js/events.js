@@ -90,10 +90,18 @@ export const AppEvents = Object.freeze({
   FHIRPATH_TESTER_REQUESTED: 'fhirpath-tester-requested',
   CHECK_FORM_REQUESTED: 'check-form-requested',
   // Standalone check page: detail { text } / { message } / { report }
+  CHECK_RESET:           'check-reset', // clear the report and the inputs: back to "what do you want to do?"
+  CHECK_MODE_CHANGED:    'check-mode-changed', // { mode: 'check' | 'compare' }
+  CHECK_REPORT_SHOWN:    'check-report-shown', // { mode } — the report is on the page (after a successful render)
   CHECK_SOURCE_PROVIDED: 'check-source-provided',
   CHECK_PROGRESS:        'check-progress', // { done, total }
   CHECK_FAILED:          'check-failed',
   CHECK_REPORT_READY:    'check-report-ready',
+  // Comparison with a reference file: { reference, current, tryGenerated } / { done, total } / { message } / { report }
+  COMPARE_SOURCES_PROVIDED: 'compare-sources-provided',
+  COMPARE_PROGRESS:         'compare-progress',
+  COMPARE_FAILED:           'compare-failed',
+  COMPARE_REPORT_READY:     'compare-report-ready',
 
   // ── Builder utilities ──────────────────────────────────────────────────────
   // Dispatched by nodes/modals when they change FHIR data that requires

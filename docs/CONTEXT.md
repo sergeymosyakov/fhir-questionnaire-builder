@@ -8,7 +8,7 @@
 
 ## What It Is
 
-A prototype **Logic Builder** for medical questionnaires (FHIR R4 / R4B / R5 Questionnaire).
+A prototype **FHIR Questionnaire Builder** for medical questionnaires (FHIR R4 / R4B / R5 Questionnaire).
 Allows visually building questionnaire logic, testing it against patient data, and importing/exporting FHIR R4/R4B/R5 JSON or REDCap CSV.
 
 ---

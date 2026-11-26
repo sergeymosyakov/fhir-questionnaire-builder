@@ -1,4 +1,6 @@
 // Shared shell for generated, crawlable pages (gallery.html, templates.html) — never hand-edited output.
+import { brandLinkHtml, AUTHOR_NAMES, AUTHORS_LD } from '../core/branding.js';
+
 export const SITE = 'https://fhirbuilder.com';
 
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -8,8 +10,9 @@ const json = (o) => JSON.stringify(o, null, 2).replace(/</g, '\\u003c');
 // Internal links shared by every generated page: gives each public page crawlable inbound links.
 const SITE_LINKS = [
   ['index.html', 'Builder'], ['templates.html', 'Templates'], ['gallery.html', 'Calculation gallery'],
-  ['docs.html', 'Documentation'], ['help.html', 'FHIR field reference'], ['widget-demo.html', 'Embeddable widget'],
+  ['docs.html', 'Documentation'], ['questionnaire-check.html', 'Form Check'], ['help.html', 'FHIR field reference'], ['widget-demo.html', 'Embeddable widget'],
 ];
+// Site links at the foot of the hub pages (nested pages rely on their breadcrumb). The powered-by / authors lines (branding.js) are not shown yet.
 export function siteFooter(root = '') {
   return `  <footer class="page-footer" data-testid="page-footer">
     <nav aria-label="Site">${SITE_LINKS.map(([href, label]) => `<a href="${root}${href}">${label}</a>`).join('')}<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" rel="noopener">GitHub</a></nav>
@@ -51,7 +54,7 @@ function headerTitle(p) {
 export function renderStaticPage(p) {
   const url = `${SITE}/${p.file}`;
   const root = p.root ?? '';
-  const ld = { '@context': 'https://schema.org', '@graph': p.jsonLd(url) };
+  const ld = { '@context': 'https://schema.org', '@graph': p.jsonLd(url).map((n) => (['WebPage', 'TechArticle'].includes(n['@type']) ? { ...n, author: AUTHORS_LD } : n)) };
   return `<!DOCTYPE html>
 <!-- ${p.generatedBy} -->
 <html lang="en">
@@ -61,6 +64,7 @@ export function renderStaticPage(p) {
   <title>${esc(p.pageTitle)}</title>
   <meta name="description" content="${esc(p.description)}">
   <meta name="keywords" content="${esc(p.keywords)}">
+  <meta name="author" content="${esc(AUTHOR_NAMES)}">
   <meta property="og:type"        content="website">
   <meta property="og:title"       content="${esc(p.title)}">
   <meta property="og:description" content="${esc(p.description)}">
@@ -81,6 +85,7 @@ ${json(ld)}
 <body>
   <header class="page-header">
     <div class="page-header-bar">
+      ${brandLinkHtml(root)}
 ${headerTitle(p)}
       <a class="page-header-back" href="${root}index.html" data-testid="${p.openBuilderTestid}">← Back to Builder</a>
     </div>
