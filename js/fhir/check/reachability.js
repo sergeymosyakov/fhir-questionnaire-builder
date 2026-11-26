@@ -118,10 +118,11 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
     let answers = scenarios[s]; // the answers still enabled by Show When; the rest are dropped, as a person could not give them
     let results = {};
     let envVars;
+    let qr;
     try {
       for (let round = 0; round < 3; round++) {
         const values = Object.fromEntries(Object.entries(answers).map(([id, v]) => [id, [v]])); // the answer store keeps a list per question
-        const qr = buildQR(base, values);
+        qr = buildQR(base, values);
         results = {};
         envVars = buildVarEnv(variables, qr, fp);
         for (let pass = 0; pass < passes; pass++) { // results are written back into the response, so a later calculation reads an earlier one
@@ -142,7 +143,7 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
       gave[c.id] = v === undefined || v === null || v === '' ? null : String(v);
       if (gave[c.id] !== null) reached.get(c.id).add(gave[c.id]);
     }
-    trials.push({ answers, results: gave });
+    trials.push({ answers, results: gave, qr }); // qr: the response with the calculated values written in
   }
 
   onProgress?.(scenarios.length, scenarios.length);

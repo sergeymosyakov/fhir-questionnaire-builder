@@ -38,6 +38,7 @@ import { PanelResizer } from './ui/panel-resizer.js';
 import { SimpleMode } from './ui/simple-mode.js';
 import { PanelVisibility } from './ui/panel-visibility.js';
 import { BuilderMetaToggle } from './ui/builder-meta-toggle.js';
+import { QuestionnaireHandoff } from './ui/questionnaire-handoff.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import './ui/modals/translate-modal.js';
@@ -99,6 +100,9 @@ new PanelVisibility();
 
 // ── id/prefix meta row visibility (self-finds left-panel) ────────────────────
 new BuilderMetaToggle();
+
+// ── A Questionnaire another page (the Form Check page) left for this tab ─────
+new QuestionnaireHandoff();
 
 // Validators: read config.json and prefs from localStorage directly
 initValidators();

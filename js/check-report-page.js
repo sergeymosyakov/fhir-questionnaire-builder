@@ -1,5 +1,12 @@
 // Form Check Report page: renders the report model the Check my form window left in sessionStorage.
-import { CHECK_REPORT_KEY } from './fhir/check/report-storage.js';
+import { loadReport } from './fhir/check/report-storage.js';
+import { AppEvents } from './events.js';
+import { highlightJson } from './utils.js';
+import { runCheck } from './fhir/check/run-check.js';
+import { putHandoff } from './core/questionnaire-handoff.js';
+import { buildReferenceBundle, hasReference } from './fhir/check/reference-bundle.js';
+import { downloadJSON } from './fhir/download.js';
+import { CheckUpload } from './ui/check-upload.js';
 
 const el = (tag, className, text, testid) => {
   const n = document.createElement(tag);
@@ -49,9 +56,15 @@ function renderCalc(c) {
   return box;
 }
 
+function jsonView(questionnaire) {
+  const pre = el('pre', 'fhir-json-view check-report-json', null, 'check-report-json');
+  pre.innerHTML = highlightJson(JSON.stringify(questionnaire, null, 2)); // the text is escaped first, as in the builder's JSON view
+  return pre;
+}
+
 function renderSource(questionnaire) {
   const box = el('details', 'check-report-source', null, 'check-report-source');
-  box.append(el('summary', null, 'Questionnaire that was checked (JSON) — click to expand'), el('pre', 'check-report-json', JSON.stringify(questionnaire, null, 2), 'check-report-json'));
+  box.append(el('summary', null, 'Questionnaire that was checked (JSON) — click to expand'), jsonView(questionnaire));
   return box;
 }
 
@@ -100,6 +113,20 @@ function render(report) {
   const root = document.getElementById('checkReportRoot');
   root.innerHTML = '';
   const bad = report.calcs.filter((c) => c.status === 'unreachable' || c.status === 'no-result').length + (report.unshown?.length ?? 0);
+  const actions = el('div', 'check-report-actions qdoc-no-print');
+  if (report.questionnaire) {
+    const open = el('button', 'qdoc-btn', '\u270E Open in builder', 'check-report-open-btn');
+    open.type = 'button';
+    open.addEventListener('click', () => openInBuilder(report));
+    actions.append(open);
+  }
+  if (hasReference(report)) {
+    const exp = el('button', 'qdoc-btn', '\u2B07 Save reference file (FHIR Bundle)', 'check-report-export-btn');
+    exp.type = 'button';
+    exp.addEventListener('click', () => downloadJSON(buildReferenceBundle(report), 'form-check-reference.bundle.json'));
+    actions.append(exp);
+  }
+  if (actions.childElementCount) root.append(actions);
   root.append(
     el('h2', 'check-report-form', report.title),
     el('p', 'check-report-summary', `${report.calcs.length} calculations, ${report.scenarios} answer combinations tried${report.truncated ? ' (a very large form, so not all were)' : ''}; ${bad ? `${bad} need attention (calculations and questions that are never shown)` : 'no problems found'}. ${new Date(report.when).toLocaleString()}`, 'check-report-summary'),
@@ -135,11 +162,43 @@ window.addEventListener('afterprint', () => readLists().forEach((d) => { d.open 
 
 document.querySelector('[data-testid="check-report-print-btn"]').addEventListener('click', () => window.print());
 
-try {
-  const raw = sessionStorage.getItem(CHECK_REPORT_KEY);
-  if (raw) {
-    const report = JSON.parse(raw);
-    render(report);
-    document.querySelector('[data-testid="check-report-csv-btn"]').addEventListener('click', () => downloadCsv(report));
-  }
-} catch { /* storage unavailable or invalid: the page keeps its empty state */ }
+const reportRoot = document.getElementById('checkReportRoot');
+const emptyState = reportRoot.firstElementChild; // the page's own "nothing checked yet" paragraph
+const csvBtn = document.querySelector('[data-testid="check-report-csv-btn"]');
+let current = null;
+
+function show(report) {
+  current = report;
+  render(report);
+  csvBtn.hidden = false;
+}
+csvBtn.addEventListener('click', () => current && downloadCsv(current));
+async function openInBuilder(report) {
+  const tab = window.open('', '_blank'); // opened at once, while the click still counts; pointed at the builder once the questionnaire is stored
+  if (!tab) { fail('The browser blocked the new tab. Allow pop-ups for this page and try again.'); return; }
+  const id = await putHandoff(report.questionnaire);
+  if (!id) { tab.close(); fail('The questionnaire is too large to hand over to the builder from this tab.'); return; }
+  tab.location.href = `./?handoff=${id}`;
+}
+
+const fail = (message) => document.dispatchEvent(new CustomEvent(AppEvents.CHECK_FAILED, { detail: { message } }));
+
+document.addEventListener(AppEvents.CHECK_REPORT_READY, (e) => show(e.detail.report));
+document.addEventListener(AppEvents.CHECK_SOURCE_PROVIDED, async (e) => {
+  current = null; // a failed run must not leave the previous form's report, and its buttons, standing
+  csvBtn.hidden = true;
+  reportRoot.replaceChildren(emptyState);
+  try {
+    const report = await runCheck(e.detail.text, {
+      fp: window.fhirpath,
+      onProgress: (done, total) => document.dispatchEvent(new CustomEvent(AppEvents.CHECK_PROGRESS, { detail: { done, total } })),
+    });
+    document.dispatchEvent(new CustomEvent(AppEvents.CHECK_REPORT_READY, { detail: { report } }));
+  } catch (err) { fail(`The check could not run: ${err.message}`); }
+});
+
+new CheckUpload();
+
+loadReport() // left by the builder's Check my form window
+  .then((report) => { if (report) document.dispatchEvent(new CustomEvent(AppEvents.CHECK_REPORT_READY, { detail: { report } })); })
+  .catch(() => { /* storage unavailable or invalid: the page keeps its empty state */ });

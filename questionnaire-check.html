@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/page-header.css">
   <link rel="stylesheet" href="css/questionnaire-docs.css">
+  <link rel="stylesheet" href="css/json-view.css">
   <link rel="stylesheet" href="css/check-report.css">
 </head>
 <body>
@@ -15,17 +16,24 @@
     <div class="page-header-bar">
       <h1 class="page-header-title">Form Check Report</h1>
       <div class="qdoc-actions">
-        <button type="button" class="qdoc-btn" data-testid="check-report-csv-btn">&#x2B07; Download answer sets (CSV)</button>
+        <button type="button" class="qdoc-btn" data-testid="check-report-csv-btn" hidden>&#x2B07; Download answer sets (CSV)</button>
         <button type="button" class="qdoc-btn" data-testid="check-report-print-btn">&#x1F5A8;&#xFE0F; Print summary</button>
       </div>
+      <a href="index.html" class="page-header-back" target="_parent" data-back-link>&larr; Back to Builder</a>
     </div>
     <p class="page-header-subtitle">What the check calculated: for every calculation, each result that appeared with sample answers that give it, and the results that never appeared.</p>
   </div>
 
+  <div class="check-upload-mount qdoc-no-print" data-mount="check-upload"></div>
+
   <div id="checkReportRoot" class="qdoc-root" data-testid="check-report-root">
-    <p class="qdoc-empty" data-testid="check-report-empty">No report is available in this tab. Open it from the builder's Settings &#x25BE; &rarr; Check my form&hellip; window.</p>
+    <p class="qdoc-empty" data-testid="check-report-empty">Nothing has been checked yet. Choose a Questionnaire above, or open the builder's Settings &#x25BE; &rarr; Check my form&hellip; window.</p>
   </div>
 
+  <script src="lib/dompurify.min.js"></script>
+  <script src="lib/fhirpath.min.js"></script>
+  <script src="lib/fhirpath.r4.min.js"></script>
+  <script type="module" src="js/embedded-nav.js"></script>
   <script type="module" src="js/check-report-page.js"></script>
 </body>
 </html>
