@@ -14,6 +14,9 @@
   white-space: pre-wrap;
   word-break: break-all;
   tab-size: 2;
+  color-scheme: dark; /* the scrollbar sits on the dark panel, not a white strip */
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
   /* fill right panel just like preview-card */
   min-height: 100%;
 }
