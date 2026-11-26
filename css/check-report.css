@@ -33,7 +33,7 @@
 
 .check-report-source { margin: 0 0 16px; border: 1px solid #ddd; padding: 6px 10px; }
 .check-report-source > summary { cursor: pointer; font-weight: 600; }
-.check-report-json { margin: 8px 0 0; max-height: 420px; overflow: auto; font-size: 0.8rem; white-space: pre; -webkit-overflow-scrolling: touch; }
+.check-report-json { margin: 8px 0 0; max-height: 420px; min-height: 0; -webkit-overflow-scrolling: touch; }
 
 .check-report-reads { margin: 4px 0; font-size: 0.9rem; }
 .check-report-reads > summary { cursor: pointer; }

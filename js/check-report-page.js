@@ -1,6 +1,7 @@
 // Form Check Report page: renders the report model the Check my form window left in sessionStorage.
 import { loadReport } from './fhir/check/report-storage.js';
 import { AppEvents } from './events.js';
+import { highlightJson } from './utils.js';
 import { runCheck } from './fhir/check/run-check.js';
 import { putHandoff } from './core/questionnaire-handoff.js';
 import { buildScenarioBundle, hasScenarios } from './fhir/check/scenario-bundle.js';
@@ -55,9 +56,15 @@ function renderCalc(c) {
   return box;
 }
 
+function jsonView(questionnaire) {
+  const pre = el('pre', 'fhir-json-view check-report-json', null, 'check-report-json');
+  pre.innerHTML = highlightJson(JSON.stringify(questionnaire, null, 2)); // the text is escaped first, as in the builder's JSON view
+  return pre;
+}
+
 function renderSource(questionnaire) {
   const box = el('details', 'check-report-source', null, 'check-report-source');
-  box.append(el('summary', null, 'Questionnaire that was checked (JSON) — click to expand'), el('pre', 'check-report-json', JSON.stringify(questionnaire, null, 2), 'check-report-json'));
+  box.append(el('summary', null, 'Questionnaire that was checked (JSON) — click to expand'), jsonView(questionnaire));
   return box;
 }
 

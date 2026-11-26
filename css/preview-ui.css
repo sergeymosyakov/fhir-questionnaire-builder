@@ -266,42 +266,6 @@
   display: none;
 }
 
-/* === FHIR JSON view ========================================================= */
-.fhir-json-view {
-  margin: 0;
-  padding: 18px 20px;
-  overflow: auto;
-  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', 'Menlo', monospace;
-  font-size: 12.5px;
-  line-height: 1.65;
-  background: #0f172a;
-  color: #cbd5e1;
-  border-radius: var(--r);
-  border: 1px solid #1e293b;
-  box-shadow: var(--shadow);
-  white-space: pre-wrap;
-  word-break: break-all;
-  tab-size: 2;
-  /* fill right panel just like preview-card */
-  min-height: 100%;
-}
-/* JSON syntax tokens */
-.jv-k    { color: #93c5fd; }           /* object key       — light blue  */
-.jv-s    { color: #86efac; }           /* string value     — light green */
-.jv-n    { color: #fbbf24; }           /* number           — amber       */
-.jv-b    { color: #c4b5fd; }           /* boolean          — violet      */
-.jv-null { color: #94a3b8; font-style: italic; } /* null  — slate grey  */
-/* Search marks inside JSON view */
-.fhir-json-view mark.search-match {
-  background: rgba(251,191,36,.35);
-  color: inherit;
-  border-radius: 2px;
-  outline: 1px solid rgba(251,191,36,.6);
-}
-.fhir-json-view mark.search-match--active {
-  background: rgba(251,191,36,.75);
-  outline: 1px solid #fbbf24;
-}
 
 /* calc-badge: hide entirely in no-badges mode */
 .preview--no-badges .calc-badge { display: none; }

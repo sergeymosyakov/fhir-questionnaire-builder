@@ -10,6 +10,7 @@
 /* Preview structure + patient/table view + controls */
 @import "./preview-structure.css";
 @import "./preview-ui.css";
+@import "./json-view.css";
 @import "./preview-controls.css";
 @import "./preview-search.css";
 @import "./controls.css";
