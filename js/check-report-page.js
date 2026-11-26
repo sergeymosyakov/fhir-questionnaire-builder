@@ -4,7 +4,7 @@ import { AppEvents } from './events.js';
 import { highlightJson } from './utils.js';
 import { runCheck } from './fhir/check/run-check.js';
 import { putHandoff } from './core/questionnaire-handoff.js';
-import { buildScenarioBundle, hasScenarios } from './fhir/check/scenario-bundle.js';
+import { buildReferenceBundle, hasReference } from './fhir/check/reference-bundle.js';
 import { downloadJSON } from './fhir/download.js';
 import { CheckUpload } from './ui/check-upload.js';
 
@@ -120,10 +120,10 @@ function render(report) {
     open.addEventListener('click', () => openInBuilder(report));
     actions.append(open);
   }
-  if (hasScenarios(report)) {
-    const exp = el('button', 'qdoc-btn', '\u2B07 Export scenarios (FHIR Bundle)', 'check-report-export-btn');
+  if (hasReference(report)) {
+    const exp = el('button', 'qdoc-btn', '\u2B07 Save reference file (FHIR Bundle)', 'check-report-export-btn');
     exp.type = 'button';
-    exp.addEventListener('click', () => downloadJSON(buildScenarioBundle(report), 'form-check-scenarios.bundle.json'));
+    exp.addEventListener('click', () => downloadJSON(buildReferenceBundle(report), 'form-check-reference.bundle.json'));
     actions.append(exp);
   }
   if (actions.childElementCount) root.append(actions);

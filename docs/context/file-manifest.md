@@ -31,7 +31,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `widget-demo.html` | Dogfood host page — three isolated `QuestionnaireRenderer` widgets (preview/patient/json modes) over `annual-health-check.fhir.json`; search + validation + explain + tooltips enabled; equal-height columns with per-column scroll. |
 | `js/fhir/sdc-populate.js` | Pure `populateFromServer(fhirBase, questJson, patientRef, corsProxy?)` — `POST Questionnaire/$populate` with a `Parameters` body (`questionnaire`, `subject`, `local: true`); handles both direct `QuestionnaireResponse` result and wrapped `Parameters` result; 30s timeout; CORS proxy-aware |
 | `js/fhir/check/run-check.js` | `runCheck(text, { fp, onProgress })` — checks a Questionnaire given as text in its own session (no builder); returns the report model |
-| `js/fhir/check/scenario-bundle.js` | `buildScenarioBundle(report)` — batch Bundle of completed QuestionnaireResponses, one per answer set tried; `hasScenarios` |
+| `js/fhir/check/reference-bundle.js` | `buildReferenceBundle(report)` — the check's reference file: `collection` Bundle (tag `check-reference`, identifier, timestamp), the Questionnaire first, then a completed QuestionnaireResponse per answer set; `hasReference` |
 | `js/ui/check-upload.js` | `CheckUpload` — file choice / drop / paste block of the Form Check page; dispatches `CHECK_SOURCE_PROVIDED`, shows `CHECK_FAILED` |
 | `js/core/json-pack.js` | `packJson` / `unpackJson` — any JSON as gzip + base64 for storage |
 | `js/core/questionnaire-handoff.js` | `putHandoff` (returns a one-off id) / `takeHandoff(id)` / `dropHandoff` — packed Questionnaire in localStorage for a new builder tab, found by `?handoff=<id>`; leftovers swept after 10 min |
@@ -374,7 +374,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `playwright.config.js` | Playwright config — Chromium only with `--headless=new` (new headless mode, consistent with headed timing), `testDir: tests/e2e`, `retries: 2` on CI, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
 | `tests/e2e/perf/large-questionnaire.spec.js` | Performance regression suite (tagged `@perf`) — loads the real WHO EmCare fixture (226 items) + a generated depth-8/250-item calc-chain form; measures `builder:render-done`/`preview:render-done` timing and asserts render under a generous ceiling (gross-regression gate). Run separately in the CI `perf` job |
-| `tests/e2e/check-page.spec.js` | E2E — Form Check page: file/paste check, progress, refusal, Back to Builder, Open in builder, Export scenarios |
+| `tests/e2e/check-page.spec.js` | E2E — Form Check page: file/paste check, progress, refusal, Back to Builder, Open in builder, Save reference file |
 | `tests/e2e/quantity-partial.spec.js` | E2E — an optional quantity filled in part is flagged and not exported |
 | `tests/e2e/confirm-modals.spec.js` | E2E — delete confirmation resolves with the pressed button (Esc / Cancel / backdrop / Delete) |
 | `tests/e2e/helpers/*.js` | Shared e2e helpers — `builder.js` (builder/fixture setup), `dropdown.js` (retry-safe dropdown open), `metadata.js`, `terminology.js` (`mockTerminologyExpand`) |
@@ -455,7 +455,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/security-workflows.test.js` | Security tests — workflow permissions, SHA pinning, no script injection |
 | `tests/security-cors-worker.test.js` | Security tests — CORS worker target/origin/body rules |
 | `tests/fhir-tooltip-attrs.test.js` | Unit tests — FHIR tooltip attributes present on mapped controls |
-| `tests/check-scenario-bundle.test.js` | Unit tests — scenario Bundle shape, no mutation, `hasScenarios` |
+| `tests/check-reference-bundle.test.js` | Unit tests — reference Bundle shape, no `request`, metadata, references, `hasReference` |
 | `tests/check-report-storage.test.js` | Unit tests — report stored as is, packed when it does not fit, read back |
 | `tests/core-questionnaire-handoff.test.js` | Unit tests — hand-off pack/unpack, take-once, storage failure |
 | `tests/ui-dropdown-menu.test.js` | Unit tests (jsdom) — `DropdownMenu` |

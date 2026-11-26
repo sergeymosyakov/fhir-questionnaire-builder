@@ -3,7 +3,7 @@
 // ── data-testid registry ─────────────────────────────────────────────────────
 //   check-upload / -file / -text / -run-btn / -error / -progress   the load block on questionnaire-check.html (-progress while it runs)
 //   check-report-root / -summary / -calc / -empty      the report it draws
-//   check-report-open-btn / -export-btn / -csv-btn     "Open in builder" and "Export scenarios" (above the report title) / CSV download
+//   check-report-open-btn / -export-btn / -csv-btn     "Open in builder" and "Save reference file" (above the report title) / CSV download
 //   notif-body-error                                   the builder's error dialog (hand-off that is gone)
 // The builder's rendered preview ([data-preview-id]) is the sanctioned preview-panel exception.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -64,17 +64,18 @@ test.describe('Form Check page', () => {
     await expect(page.getByTestId('check-upload-error')).toContainText('Questionnaire');
   });
 
-  test('Export scenarios downloads a batch Bundle of QuestionnaireResponses with the calculated values', async ({ page }) => {
+  test('Save reference file downloads a collection Bundle: the Questionnaire, then a QuestionnaireResponse per scenario with the calculated values', async ({ page }) => {
     await page.getByTestId('check-upload-file').setInputFiles(TEMPLATE);
     await expect(page.getByTestId('check-report-export-btn')).toBeVisible({ timeout: 30_000 });
     const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('check-report-export-btn').click()]);
-    expect(download.suggestedFilename()).toBe('form-check-scenarios.bundle.json');
+    expect(download.suggestedFilename()).toBe('form-check-reference.bundle.json');
     const bundle = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
-    expect(bundle).toMatchObject({ resourceType: 'Bundle', type: 'batch' });
-    expect(bundle.entry.length).toBeGreaterThan(10);
-    const all = bundle.entry.map((e) => e.resource);
-    expect(all.every((r) => r.resourceType === 'QuestionnaireResponse' && r.status === 'completed')).toBe(true);
-    expect(JSON.stringify(all)).toContain('phq9-total'); // a calculated value is part of the response
+    expect(bundle).toMatchObject({ resourceType: 'Bundle', type: 'collection', meta: { tag: [{ code: 'check-reference' }] } });
+    expect(bundle.entry[0].resource.resourceType).toBe('Questionnaire');
+    const answers = bundle.entry.slice(1).map((e) => e.resource);
+    expect(answers.length).toBeGreaterThan(10);
+    expect(answers.every((r) => r.resourceType === 'QuestionnaireResponse' && r.status === 'completed')).toBe(true);
+    expect(JSON.stringify(answers)).toContain('phq9-total'); // a calculated value is part of the response
   });
 
   test('a refused second file does not leave the first report standing', async ({ page }) => {
