@@ -6,7 +6,7 @@ import { buildFHIRObject } from '../../fhir/export.js';
 import { checkForm } from '../../fhir/check/reachability.js';
 import { showWarn } from '../toast.js';
 import { buildReport } from '../../fhir/check/report.js';
-import { CHECK_REPORT_KEY } from '../../fhir/check/report-storage.js';
+import { storeReportPlain, storeReportPacked } from '../../fhir/check/report-storage.js';
 
 const LABEL = {
   unreachable: 'Some results can never appear',
@@ -79,23 +79,19 @@ class CheckFormModal extends Modal {
     this.body.appendChild(this._reportLink());
   }
 
-  _store(report) {
-    try { sessionStorage.setItem(CHECK_REPORT_KEY, JSON.stringify(report)); return true; } catch { return false; }
-  }
-
   _reportLink() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'eb-text-toggle';
     btn.dataset.testid = 'check-form-report-btn';
     btn.textContent = 'Open full report (everything that was calculated) →';
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       if (!this._report) { showWarn('The report could not be built for this form.'); return; }
-      if (!this._store(this._report) && !this._store({ ...this._report, questionnaire: null })) { // too large: keep the report, leave out the questionnaire text
+      if (!storeReportPlain(this._report) && !(await storeReportPacked(this._report))) { // no await before window.open unless the report has to be packed
         showWarn('The report is too large for this browser tab to hand over.');
         return;
       }
-      window.open('questionnaire-check.html', '_blank');
+      if (!window.open('questionnaire-check.html', '_blank')) showWarn('The browser blocked the new tab. Allow pop-ups for this page and try again.'); // the new tab gets a copy of the stored report as it opens
     });
     return btn;
   }

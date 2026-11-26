@@ -21,6 +21,7 @@ export function buildReport({ tree, result, title, questionnaire = null }) {
   const trials = result.trials.map((t) => ({
     answers: Object.entries(t.answers).map(([id, v]) => `${name(id)} = ${label(id, v)}`),
     results: result.calcs.map((c) => t.results[c.id] ?? null), // in the order of `calcs`
+    qr: t.qr ?? null,
   }));
   return { title: title || 'Questionnaire', when: new Date().toISOString(), questionnaire, scenarios: result.scenarios, truncated: !!result.truncated, unshown: result.unshown ?? [], calcs, trials };
 }

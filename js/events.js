@@ -89,6 +89,11 @@ export const AppEvents = Object.freeze({
   TRANSLATE_REQUESTED: 'translate-requested',
   FHIRPATH_TESTER_REQUESTED: 'fhirpath-tester-requested',
   CHECK_FORM_REQUESTED: 'check-form-requested',
+  // Standalone check page: detail { text } / { message } / { report }
+  CHECK_SOURCE_PROVIDED: 'check-source-provided',
+  CHECK_PROGRESS:        'check-progress', // { done, total }
+  CHECK_FAILED:          'check-failed',
+  CHECK_REPORT_READY:    'check-report-ready',
 
   // ── Builder utilities ──────────────────────────────────────────────────────
   // Dispatched by nodes/modals when they change FHIR data that requires
