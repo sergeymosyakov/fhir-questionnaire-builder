@@ -50,6 +50,6 @@ describe('ChoiceModal', () => {
     m._cancel();
     await p;
     btn.click();
-    expect(m.closed).toBe(2);
+    expect(m.closed).toBe(1);
   });
 });

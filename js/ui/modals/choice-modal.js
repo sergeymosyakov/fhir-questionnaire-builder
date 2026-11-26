@@ -29,9 +29,10 @@ export class ChoiceModal extends Modal {
 
   _done(result) {
     const resolve = this._resolve;
+    if (!resolve) return;
     this._resolve = null;
     this.close();
-    resolve?.(result);
+    resolve(result);
   }
 
   _apply()  { /* the buttons are the choices */ }
