@@ -103,23 +103,12 @@ jobs:
           path: test-results/
           retention-days: 30
 
-  # Deploy app + test report to GitHub Pages.
-  # Requires: Settings → Pages → Source = "GitHub Actions".
-  deploy:
+  # Separate from deploy: re-running deploy alone must not upload a second "github-pages" artifact.
+  build-site:
     needs: [lint, test, e2e]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -157,7 +146,7 @@ jobs:
             . _site/
           cp -r playwright-report/. _site/playwright-report/
           cp -r coverage/. _site/coverage/
-      # Test reports are for developers, not search results: mark every report page noindex and fail the deploy if one is missed.
+      # Test reports are for developers, not search results: mark every report page noindex and fail the build if one is missed.
       - name: Mark reports noindex
         run: |
           find _site/coverage _site/playwright-report -name '*.html' -exec sed -i 's#<head>#<head><meta name="robots" content="noindex, nofollow">#I' {} +
@@ -166,5 +155,22 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site/
+
+  # Deploy app + test report to GitHub Pages.
+  # Requires: Settings → Pages → Source = "GitHub Actions".
+  deploy:
+    needs: build-site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
