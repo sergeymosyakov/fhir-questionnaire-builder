@@ -2,7 +2,7 @@
 // A value without a unit (or the reverse) shows its message and a failed check icon; the export leaves it out.
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   qty-num-input / qty-unit-sel   quantity control in the preview (unit picker is a custom select)
+//   qty-num-input   number field of the quantity control in the preview
 //   preview-mode-btn / preview-mode-json / preview-mode-preview   switch the preview and back (rebuilds it)
 //   status-badge-btn   PASS/FAIL pill in the preview header
 //   export-btn / export-qr-item, qrExportModal / qrExportModalApply   QuestionnaireResponse export

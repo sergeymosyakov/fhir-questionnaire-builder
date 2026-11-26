@@ -65,7 +65,7 @@ function exceedsItemDepth(items, limit) {
 
 // A malformed item list is refused before anything of the open form is destroyed.
 function hasMalformedItems(items) {
-  if (items === undefined) return false;
+  if (items === undefined || items === null) return false;
   return !Array.isArray(items) || items.some(i => !i || typeof i !== 'object' || Array.isArray(i) || hasMalformedItems(i.item));
 }
 

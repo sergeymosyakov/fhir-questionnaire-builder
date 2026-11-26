@@ -148,9 +148,8 @@ test.describe('rendering-xhtml — XSS sanitization (additional vectors)', () =>
     await buildItemAndOpenAppearance(page);
     await applyXhtml(page, '<span onclick="window.__xss4=1">text</span>');
 
-    const span = page.locator('[data-preview-id="1.1"] span', { hasText: 'text' }).first();
-    await expect(span).toBeVisible();
-    expect(await span.getAttribute('onclick')).toBeNull();
+    await expect(page.locator('[data-preview-id="1.1"]').getByText('text', { exact: true })).toBeVisible();
+    await expect(page.locator('[data-preview-id="1.1"] [onclick]')).toHaveCount(0);
   });
 
   test('safe <a href> link is preserved after sanitization', async ({ page }) => {

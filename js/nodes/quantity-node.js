@@ -53,7 +53,7 @@ export class QuantityNode extends ItemNode {
     // not from node.quantityUnit — otherwise the fixed default always overrides the selection.
     const hasCustomUnits = (node._unitOptions && node._unitOptions.length) || node._unitValueSet;
     const initUnit = current
-      ? (current.unit || (!hasCustomUnits ? node.quantityUnit : '') || '')
+      ? (current.unit || (!hasCustomUnits && !stored.incomplete ? node.quantityUnit : '') || '')
       : (!hasCustomUnits ? node.quantityUnit || '' : '');
 
     const numInput = document.createElement('input');

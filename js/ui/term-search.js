@@ -286,8 +286,10 @@ export class TermSearch {
 
   // The user cleared the box: a search still in flight must not bring results back.
   _clearResults() {
+    clearTimeout(this._debounce);
     this._searchGen++;
     this._abortCtrl?.abort();
+    this._setLoading(false);
     this._wipeResults();
   }
 

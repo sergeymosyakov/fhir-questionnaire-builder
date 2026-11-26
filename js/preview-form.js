@@ -227,7 +227,7 @@ export class PreviewForm {
   }
 
   async reinitForm(opts) {
-    try { await this._reinitForm(opts); } catch (err) { this._progress.hide(); this._notify.error(`The preview could not be built: ${err.message}`); }
+    try { await this._reinitForm(opts); } catch (err) { this._progress.hide(); console.error(err); this._notify.error(`The preview could not be built: ${err.message}`); }
   }
 
   async _reinitForm({ silent = false } = {}) {
@@ -395,7 +395,7 @@ export class PreviewForm {
   }
 
   async _asyncRender(version) {
-    try { await this._renderAsync(version); } catch (err) { this._progress.hide(); this._notify.error(`The preview could not be rendered: ${err.message}`); }
+    try { await this._renderAsync(version); } catch (err) { this._progress.hide(); console.error(err); this._notify.error(`The preview could not be rendered: ${err.message}`); }
   }
 
   async _renderAsync(version) {

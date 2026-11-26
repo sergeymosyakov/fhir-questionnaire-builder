@@ -57,6 +57,16 @@ test.describe('QuestionnaireRenderer widget', () => {
     expect(answered).toBeGreaterThan(0);
   });
 
+  test('a questionnaire that cannot be loaded raises the widget "error" event', async ({ page }) => {
+    await page.goto(DEMO);
+    const message = await page.evaluate(async () => {
+      const { QuestionnaireRenderer } = await import('/js/renderer/index.js');
+      const w = new QuestionnaireRenderer(document.createElement('div'), { questionnaire: '{ not json' });
+      return new Promise(resolve => w.on('error', resolve));
+    });
+    expect(message).toBe('The questionnaire could not be loaded.');
+  });
+
   test('three preview modes render + instances stay isolated', async ({ page }) => {
     await page.goto(DEMO);
     // preview + patient render as forms; json renders the FHIR JSON.
