@@ -9,7 +9,9 @@
 # release (npm + GitHub Release already succeeded). Skips lint/test/e2e/tag/
 # release/npm and republishes the existing latest widget-v* version to NuGet.
 #
-# Jobs: `verify` (read-only: install, lint, tests, build, version) → `publish` (write + OIDC:
+# Release notes: the notes file docs/releases/widget/<semver>.md must exist (checked first, before install and tests); it is the release body, no commit list is generated.
+#
+# Jobs: `verify` (read-only: version, notes check, install, lint, tests, build) → `publish` (write + OIDC:
 # GitHub Release, npm, NuGet) publishes exactly the files `verify` built, so dependency
 # install scripts never run with publishing rights.
 #
@@ -58,20 +60,6 @@ jobs:
           node-version: 24
           cache: npm
 
-      - run: npm ci
-      - run: npm run lint
-        if: ${{ !inputs.nuget_only }}
-      - run: npm test
-        if: ${{ !inputs.nuget_only }}
-      - run: sudo rm -f /etc/apt/sources.list.d/google-chrome.list*
-        if: ${{ !inputs.nuget_only }}
-      - run: npx playwright install --with-deps chromium
-        if: ${{ !inputs.nuget_only }}
-      - run: npx playwright test --grep-invert @perf --max-failures=1
-        if: ${{ !inputs.nuget_only }}
-
-      - run: npm run build:widget
-
       - name: Compute version
         id: ver
         env:
@@ -90,6 +78,27 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "semver=${TAG#widget-v}" >> "$GITHUB_OUTPUT"
           echo "Releasing $TAG"
+
+      - name: Release notes are written
+        if: ${{ !inputs.nuget_only }}
+        env:
+          SEMVER: ${{ steps.ver.outputs.semver }}
+        run: |
+          test -s "docs/releases/widget/${SEMVER}.md" || { echo "Write the release notes first: docs/releases/widget/${SEMVER}.md (human-written, not a list of commits)" >&2; exit 1; }
+
+      - run: npm ci
+      - run: npm run lint
+        if: ${{ !inputs.nuget_only }}
+      - run: npm test
+        if: ${{ !inputs.nuget_only }}
+      - run: sudo rm -f /etc/apt/sources.list.d/google-chrome.list*
+        if: ${{ !inputs.nuget_only }}
+      - run: npx playwright install --with-deps chromium
+        if: ${{ !inputs.nuget_only }}
+      - run: npx playwright test --grep-invert @perf --max-failures=1
+        if: ${{ !inputs.nuget_only }}
+
+      - run: npm run build:widget
 
       - name: Checksums
         if: ${{ !inputs.nuget_only }}
@@ -112,7 +121,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0   # tags needed for the release notes
+          fetch-depth: 0
           persist-credentials: false
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -155,12 +164,8 @@ jobs:
           SEMVER: ${{ needs.verify.outputs.semver }}
           REPO: ${{ github.repository }}
         run: |
-          # Previous widget tag = newest existing one (the new tag isn't created yet).
-          PREV=$(git tag -l 'widget-v*' | sort -V | tail -1)
-          # Auto-generate the "What's Changed" changelog from the commits since PREV.
-          CHANGELOG=$(gh api "repos/$REPO/releases/generate-notes" \
-            -f tag_name="$TAG" ${PREV:+-f previous_tag_name="$PREV"} --jq '.body' || true)
-          { cat .github/release-notes-widget.md; echo; echo "$CHANGELOG"; } > /tmp/notes.md
+          # Human-written notes (docs/releases/widget/<semver>.md), then the fixed assets / quick start text.
+          { cat "docs/releases/widget/$SEMVER.md"; echo; cat .github/release-notes-widget.md; } > /tmp/notes.md
           gh release create "$TAG" \
             dist/questionnaire-widget.js \
             dist/questionnaire-widget.global.js \
