@@ -219,7 +219,7 @@ Subscribe with `widget.on(name, cb)`:
 | `language-changed` | `string` (lang) | The active language changes. |
 | `render` | — | The form re-renders. |
 | `info` | `string` | `populate()`/`structureMapPopulate()` succeeded. |
-| `error` | `string` | `populate()`/`structureMapPopulate()` failed (e.g. `fhirBaseUrl` not set) — nothing is shown unless you listen. |
+| `error` | `string` | `populate()`/`structureMapPopulate()` failed (e.g. `fhirBaseUrl` not set), the preview could not be built or rendered, or the `questionnaire` passed to the constructor could not be loaded (the event fires after the constructor returns, so register the listener right after `new QuestionnaireRenderer(…)`). Nothing is shown for a populate failure unless you listen; a load failure also shows the loader's own error dialog on the page, as before. |
 
 ---
 

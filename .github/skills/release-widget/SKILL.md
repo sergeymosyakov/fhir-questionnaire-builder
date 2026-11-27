@@ -19,27 +19,44 @@ Release, npm (`@sergeymosyakov/questionnaire-widget`), NuGet (`FhirQuestionnaire
   `.0`, next `.1`, ...). Bumping `major`/`minor` in `version.json` resets patch to 0.
 - Predict the next tag before releasing: `git tag -l "widget-v<major>.<minor>.*" | wc -l`.
 
+## Release notes (written by hand, before the release)
+The GitHub Release body is `docs/releases/widget/<semver>.md` (the next version, e.g. `1.0.18.md`) followed by
+the fixed assets / quick-start text of `.github/release-notes-widget.md`. **The workflow refuses to run without the
+file** (it checks right after computing the version) and never fills in a list of commits.
+
+Write it for the people who embed the widget, not for the repo:
+- Find what could matter: `npx esbuild js/renderer/index.js --bundle --metafile=/tmp/m.json --outfile=/tmp/w.js` lists
+  the files in the bundle; `git log widget-v<prev>..master --no-merges -- <those files> css/widget.css` lists the
+  commits, `gh pr view <n>` / `gh issue view <n>` give the reasons. Many commits are builder-only: leave them out.
+- No title line: the release already has one. Start with one paragraph saying what the release is about.
+- Group by what the reader notices (calculations, what the response contains, conditions, language, safety,
+  API...), plain language, one line per change, issue/PR number in brackets. No commit subjects, no file names.
+- Verify each claim against the code or the PR before writing it; never describe what was not checked. For a behaviour claim that matters (a fix a host would notice), run the previous release's bundle (`gh release download widget-v<prev>`) and the current build side by side.
+- "Check before upgrading": every behaviour change a host application could depend on.
+- API: new / changed / removed (say "nothing is removed" only when true). Size: build and compare the bundle with the previous release's asset.
+- No promises: nothing about plans or dates; say what is not covered.
+- The notes file goes to `master` through a normal PR (with the review of rule 10), before the workflow is dispatched.
+
 ## Release steps
 This is a **real, hard-to-reverse action** (mints a tag + GitHub Release, publishes
 to npm and NuGet) — always state the predicted next tag and get explicit
 confirmation before triggering, per WORKFLOW RULE 1 in `.github/copilot-instructions.md` (git commit/push only on explicit instruction).
 
-1. Confirm the intended feature(s) are already merged to `master` (`gh pr list
+1. Confirm the intended feature(s) **and the release notes file** are already merged to `master` (`gh pr list
    --state all --head <branch>` if unsure) — the workflow releases whatever is on
    `master` (or the `--ref` you pass), not your local checkout.
 2. Optional but recommended before spending CI minutes: sync local master and run
    a fast local sanity check — `git checkout master && git pull --ff-only && npm
    run lint && npx vitest run`.
 3. Optional rehearsal: `gh workflow run release-widget.yml --ref master -f dry_run=true` runs
-   tests, build, tag computation, NuGet pack and `npm pack --dry-run`. It skips release
-   creation (incl. release-notes generation) and the npm/NuGet OIDC login and push, so a
-   green dry run is necessary, not sufficient.
+   the release-notes check, tests, build, tag computation, NuGet pack and `npm pack --dry-run`. It skips release
+   creation and the npm/NuGet OIDC login and push, so a green dry run is necessary, not sufficient.
 4. Trigger: `gh workflow run release-widget.yml --ref master`. Never pass
    `nuget_only=true` for a normal release — that input is the recovery-only path
    (see below).
 5. Find the run and watch it to completion: `gh run list --workflow=release-widget.yml
    --limit 1` then `gh run watch <id>`. Takes ~10-15 min. Two jobs: `verify` (read-only:
-   lint → unit → e2e (chromium only, `--grep-invert @perf`) → build widget → compute tag →
+   compute tag → check the release notes exist → lint → unit → e2e (chromium only, `--grep-invert @perf`) → build widget →
    artifact) then `publish` (write + OIDC: NuGet pack → GitHub Release → npm publish → NuGet
    publish), so dependency install scripts never run with publishing rights.
 6. Verify all three artifacts actually landed — **do not trust the job's green
